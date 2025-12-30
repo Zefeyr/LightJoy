@@ -34,10 +34,10 @@ It hosts a Web Server which forwards [Sunshine](https://docs.lizardbyte.dev/proj
 ![View: Games View](/readme/gamesView.jpg)
 
 ### Streaming
-![View: Streaming, sidebar closed](/readme/stream.jpg)
+![View: Edit Mode with Draggable Buttons](/readme/stream_edit_mode.jpg)
 
 ### Customizable Controls (Edit Mode)
-![View: Edit Mode with Draggable Buttons](/readme/stream_edit_mode.jpg)
+![View: Streaming, sidebar closed](/readme/stream.jpg)
 
 ## Limitations
 - Features that only work in a [Secure Context](https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts#:~:text=They%20must%20be,be%20considered%20deprecated.) -> [How to configure a Secure Context / https](#configuring-https)
