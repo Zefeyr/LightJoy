@@ -1,15 +1,22 @@
+# Lightjoy
+**Lightjoy** is an enhanced, web-based [Moonlight Client](https://moonlight-stream.org/) optimized for mobile and low-latency streaming. It is based on [Moonlight-Web](https://github.com/MrCreativ3001/moonlight-web-stream).
 
-# Moonlight Web
-An unofficial [Moonlight Client](https://moonlight-stream.org/) allowing you to stream your pc to the Web.
-It hosts Web Server which will forward [Sunshine](https://docs.lizardbyte.dev/projects/sunshine/latest/) traffic to a Browser using the [WebRTC Api](https://webrtc.org/).
+It hosts a Web Server which forwards [Sunshine](https://docs.lizardbyte.dev/projects/sunshine/latest/) traffic to a Browser using the [WebRTC Api](https://webrtc.org/).
 
-![An image displaying: PC with sunshine and moonlight web installed, a browser making requests to it](/readme/structure.png)
+![Lightjoy Screenshot](/readme/structure.png)
+
+## Key Features
+- **Customizable Touch Controls**: Drag and drop virtual gamepad buttons to suit your hand size and preference. Tap the **✏️ Pencil** icon to edit; your layout is saved automatically.
+- **Low Latency Optimized**: Essential features only; haptic feedback removed to prioritize input speed and frame pacing on mobile devices.
+- **Docker Support**: Deploy easily with a single command.
+- **Split Layout**: Ergonomic controls designed for touchscreens.
 
 ## Overview
 
 - [Images](#images)
 - [Limitations](#limitations)
 - [Installation](#installation)
+- [Docker Deployment](#docker-deployment)
 - [Setup](#setup)
   - [Streaming over the Internet](#streaming-over-the-internet)
   - [Configuring https](#configuring-https)
@@ -35,15 +42,24 @@ It hosts Web Server which will forward [Sunshine](https://docs.lizardbyte.dev/pr
   - Controllers: [Gamepad API](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API)
   - Keyboard Lock (allows to capture almost all keys also OS Keys): [Experimental Keyboard Lock API](https://developer.mozilla.org/en-US/docs/Web/API/Keyboard_API)
 
-## Installation
+## Docker Deployment (Recommended)
+
+1. **Install Docker** on your host machine.
+2. In the project root, run:
+   ```sh
+   docker compose up --build
+   ```
+3. Access the web interface at `http://localhost:8080`.
+
+## Installation (Manual)
 
 1. Install [Sunshine](https://github.com/LizardByte/Sunshine/blob/v2025.628.4510/docs/getting_started.md)
 
-2. Download the [compressed archive](https://github.com/MrCreativ3001/moonlight-web-stream/releases/latest) for your platform and uncompress it or [build it yourself](#building)
+2. [Build it yourself](#building) from the source code.
 
-3. Run the "web-server" executable
+3. Run the "web-server" executable.
 
-4. Change your [access credentials](#credentials) in the newly generated `server/config.json` (all changes require a restart)
+4. Change your [access credentials](#credentials) in the newly generated `server/config.json` (all changes require a restart).
 
 5. Go to `localhost:8080` and view the web interface. You can also the change [bind address](#bind-address).
 
