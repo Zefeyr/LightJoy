@@ -35,7 +35,6 @@ It hosts a Web Server which forwards [Sunshine](https://docs.lizardbyte.dev/proj
 
 ### Streaming
 ![View: Streaming, sidebar closed](/readme/stream.jpg)
-![View: Streaming, sidebar opened](/readme/streamExtended.jpg)
 
 ### Customizable Controls (Edit Mode)
 ![View: Edit Mode with Draggable Buttons](/readme/stream_edit_mode.jpg)
