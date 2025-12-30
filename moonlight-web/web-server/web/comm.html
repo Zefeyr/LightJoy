@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LightJoy Community Hub</title>
+    <link rel="stylesheet" href="comm.css">
+</head>
+<body>
+    <div class="hub-wrapper">
+        <nav class="hub-sidebar">
+            <div class="sidebar-header">Channels</div>
+            <div class="channel-list">
+                <div class="channel active"># global-chat</div>
+                <div class="channel"># support</div>
+                <div class="channel"># find-players</div>
+                <div class="channel"># patch-notes</div>
+            </div>
+            <button class="btn-home-back" onclick="window.location.href='homepage.html'">← Home</button>
+        </nav>
+
+        <main class="chat-main">
+            <header class="chat-header">
+                <h2># global-chat</h2>
+                <p>Welcome to the LightJoy Hub!</p>
+            </header>
+
+            <div id="chat-messages" class="chat-messages">
+                <div class="message">
+                    
+                    <div class="message-content">
+                        <div class="message-info">
+                            <span class="username"></span>
+                            <span class="timestamp"></span>
+                        </div>
+                        <p class="text"></p>
+                    </div>
+                </div>
+            </div>
+
+            <form class="chat-input-container" id="chat-form">
+                <input type="text" id="chat-input" placeholder="Type a message to #global-chat..." autocomplete="off">
+                <button type="submit" id="send-btn">Send</button>
+            </form>
+        </main>
+
+        <aside class="online-users">
+            <div class="sidebar-header">Online — 3</div>
+            <div class="user-list">
+                <div class="user-item"><span class="status online"></span> Gamer_Pro</div>
+                <div class="user-item"><span class="status online"></span> Network_Ninja</div>
+                <div class="user-item"><span class="status idle"></span> CloudWatcher</div>
+            </div>
+        </aside>
+    </div>
+
+    <script type="module" src="firebase-init.js"></script>
+    <script type="module" src="comm.js"></script>
+</body>
+</html>

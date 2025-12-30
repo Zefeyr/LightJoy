@@ -1,0 +1,19 @@
+{
+  "projects": {
+    "default": "light-joy",
+    "staging": "light-joy"
+  },
+  "targets": {
+    "light-joy": {
+      "hosting": {
+        "main": [
+          "skrron-main"
+        ],
+        "streaming": [
+          "skrron-stream"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

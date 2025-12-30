@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - LightJoy</title>
+    <link rel="stylesheet" href="signup.css"> 
+</head>
+<body>
+    <a href="index.html" class="nav-link">
+        <span class="nav-arrow">&larr;</span> Return
+    </a>
+
+    <div class="modal-background">
+        
+        <div class="modal-content signup-form-box">
+            <h2>Sign Up</h2>
+
+            <form id="signup-form">
+                <div class="input-div">
+                    <label for="signup-username">Username:</label>
+                    <input type="text" id="signup-username" name="username" class="textlike" required>
+                </div>
+
+                <div class="input-div">
+                    <label for="signup-email">Email:</label>
+                    <input type="email" id="signup-email" name="email" class="textlike" required>
+                </div>
+
+                <div class="input-div">
+                    <label for="signup-password">Password:</label>
+                    <input type="password" id="signup-password" name="password" class="textlike" required>
+                </div>
+                
+                <div class="input-div">
+                    <label for="signup-confirm-password">Confirm Password:</label>
+                    <input type="password" id="signup-confirm-password" name="confirm-password" class="textlike" required>
+                </div>
+
+                <div class="button-row">
+                    <button type="submit" class="submit-button">Sign Up</button>
+                </div>
+            </form>
+
+            <p class="link-text">
+                Already have an account? <a href="login.html">Log In</a>
+            </p>
+        </div>
+    </div>
+    
+    <script type="module" src="firebase-init.js"></script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,385 @@
+/* ----------------------------------------------------------- */
+/* --- BASE STYLES FROM ORIGINAL CSS --- */
+/* ----------------------------------------------------------- */
+
+body {
+    /* Set a dark background theme color similar to the LightJoy image */
+    background-color: rgb(15, 0, 30); 
+    font-size: 1.2rem;
+    font-family: sans-serif;
+    color: white; /* Ensure text is visible */
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex; /* Use flexbox to center content on the page */
+    justify-content: center;
+    align-items: center;
+}
+
+/* Prevent pull down refresh when Streaming */
+html.stream,
+body.stream {
+    overscroll-behavior: none !important;
+}
+
+h2,
+h3 {
+    margin-top: 12px;
+    margin-bottom: 8px;
+}
+
+/** Input Div */
+.input-div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+/** Hide the file input */
+input[type="file"] {
+    display: none;
+}
+
+/** Label */
+.file-label,
+label {
+    cursor: default;
+    margin-right: 5px;
+    /* Reset label color for specific login form overrides */
+    color: rgba(255, 255, 255, 0.9); 
+}
+
+/** Button (Base Style) */
+.file-button,
+button {
+    background-color: rgba(63, 81, 181, 1.0);
+    border: none;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 8px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: white;
+}
+
+/* Base button hover effect (will be overridden for the main login button) */
+.file-button:hover,
+button:hover {
+    transition: box-shadow 0.2s;
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+/** Checkbox (Custom Styling) */
+input[type="checkbox"] {
+    /* remove native box */
+    appearance: none;
+    vertical-align: middle;
+    width: 24px;
+    height: 24px;
+    border: 2px solid #555;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+}
+
+input[type="checkbox"]::after {
+    content: "✓";
+    color: white;
+    font-size: 18px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    /* start hidden */
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+input[type="checkbox"]:checked {
+    /* box fill - Purple color used in the theme */
+    background: rgb(206, 147, 216);
+    border-color: rgb(206, 147, 216);
+}
+
+input[type="checkbox"]:checked::after {
+    /* scale in */
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+}
+
+/** Text Field likes (Base Styling) */
+.textlike,
+textarea,
+select,
+input[type=text],
+input[type=password],
+input[type=number] {
+    color: white;
+    font-size: 1.2rem;
+    margin: 5px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    /* multiline */
+    overflow-x: auto;
+    overflow-y: auto;
+    white-space: pre-wrap;
+
+    max-height: max-content;
+}
+
+/* Keep the base hover effects for non-login inputs */
+.textlike:hover,
+textarea:hover:enabled,
+select:hover:enabled,
+input[type=text]:hover:enabled,
+input[type=password]:hover:enabled,
+input[type="number"]:hover:enabled {
+    transition: all 0.2s;
+    background-color: rgba(0, 0, 0, 0);
+    border-color: rgb(255, 255, 255, 0.7);
+}
+
+textarea:disabled,
+select:disabled,
+input[type=text]:disabled,
+input[type=password]:disabled,
+input[type=number]:disabled {
+    color: gray;
+}
+
+select option {
+    background-color: rgb(66, 66, 66);
+}
+
+/** Hide the number up down thingy on number inputs */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+/** Modal Background (Used as full-page container to center content) */
+.modal-background {
+    /* Overrides for centering the form */
+    display: flex;
+    position: static;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    background-color: transparent; /* Rely on body background */
+}
+
+/** Modal Content (The Base Box Style) */
+.modal-content {
+    background-color: rgb(86, 92, 100);
+    margin: 0 auto; /* Override initial centering to be centered by flexbox */
+    padding: 20px;
+    border: 1px solid #888;
+    border-radius: 5px;
+    width: 80%;
+}
+
+
+/* ----------------------------------------------------------- */
+/* --- LOGIN FORM SPECIFIC STYLING (LightJoy Aesthetic) --- */
+/* ----------------------------------------------------------- */
+
+/* Login Box Specific Styling (The Glass/Glow Effects) */
+.modal-content.login-form-box {
+    max-width: 450px;
+    padding: 40px; 
+    margin: auto; /* Ensure it's centered within the modal-background flex container */
+    
+    /* Darker, transparent purple background for the glass effect */
+    background-color: rgba(30, 0, 50, 0.4); 
+    
+    /* Thin light purple border */
+    border: 1px solid rgba(206, 147, 216, 0.6); 
+    border-radius: 15px; 
+
+    /* FROSTED GLASS EFFECT */
+    backdrop-filter: blur(10px); 
+    -webkit-backdrop-filter: blur(10px); 
+
+    /* NEON GLOW SHADOWS */
+    box-shadow: 
+        0 4px 30px rgba(0, 0, 0, 0.2), 
+        0 0 15px rgba(206, 147, 216, 0.5), /* Inner purple glow */
+        0 0 40px rgba(206, 147, 216, 0.3); /* Outer purple glow */
+}
+
+/* Header Text */
+.login-form-box h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 2.5rem;
+}
+
+/* Form Layout and Spacing */
+.login-form-box form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Space between input rows */
+}
+
+.login-form-box .input-div {
+    flex-direction: column; /* Stack label and input vertically */
+    align-items: flex-start;
+}
+
+.login-form-box label {
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+
+/* Input Overrides for Neon Look */
+.login-form-box input[type="text"],
+.login-form-box input[type="password"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 15px;
+    background-color: transparent; /* Makes the input glassy/transparent */
+    border: 1px solid rgba(206, 147, 216, 0.4); /* Light purple border */
+    border-radius: 8px;
+    font-size: 1.1rem;
+    transition: all 0.2s; /* Apply transition for smooth focus/hover */
+}
+
+/* Remove default base hover for these inputs */
+.login-form-box input[type="text"]:hover:enabled,
+.login-form-box input[type="password"]:hover:enabled {
+    background-color: transparent;
+    border-color: rgba(206, 147, 216, 0.6);
+}
+
+/* Input Focus Glow */
+.login-form-box input:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 10px rgba(206, 147, 216, 0.8);
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+/* Gradient Button Styling */
+.login-form-box .submit-button {
+    /* Overrides the original solid blue background */
+    background: linear-gradient(135deg, rgba(160, 100, 255, 1), rgba(63, 81, 181, 1));
+    padding: 10px 30px; 
+    border-radius: 20px; 
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(160, 100, 255, 0.4); 
+    font-size: 1.4rem;
+    margin: 0; /* Remove base button margin */
+}
+
+/* Gradient Button Hover Glow */
+.login-form-box .submit-button:hover {
+    box-shadow: 0 0 20px rgba(160, 100, 255, 0.8), 0 0 5px rgba(255, 255, 255, 0.4); 
+    transition: box-shadow 0.3s;
+}
+
+/* Button Row and Link */
+.login-form-box .button-row {
+    margin-top: 25px;
+    text-align: center;
+}
+
+.login-form-box .checkbox-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+}
+
+.login-form-box .link-text {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.login-form-box .link-text a {
+    color: rgb(206, 147, 216); 
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.login-form-box .link-text a:hover {
+    text-decoration: underline;
+}
+
+/* --- Navigation Back Button Style --- */
+.nav-link {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 20; /* Ensure it stays above the modal-background */
+    font-size: 18px;
+    text-decoration: none;
+    color: white; /* Default white color */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.nav-link:hover {
+    /* Subtle hover effect consistent with the dark theme */
+    background-color: rgba(255, 255, 255, 0.1); 
+    color: rgb(206, 147, 216); /* Change to theme accent color on hover */
+}
+
+/* Style for the arrow icon */
+.nav-arrow {
+    font-size: 18px;
+    line-height: 1; /* Ensure the arrow icon aligns correctly */
+}
+
+.google-signin-btn {
+    /* 1. FLEXBOX ALIGNMENT */
+    display: flex;
+    align-items: center;      /* Vertically centers logo and text */
+    justify-content: center;   /* Horizontally centers the group */
+    gap: 12px;                /* Perfect spacing between logo and text */
+    
+    /* 2. SIZING & SHAPE */
+    width: 100%;
+    max-width: 300px;         /* Adjust based on your form width */
+    padding: 12px 24px;
+    border-radius: 8px;
+    
+    /* 3. LIGHTJOY AESTHETIC */
+    background: #4285F4;      /* Google Blue */
+    color: white;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    /* 4. NEON GLOW EFFECT */
+    box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
+}
+
+.google-signin-btn:hover {
+    background: #357ae8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(66, 133, 244, 0.5);
+}
+
+.google-signin-btn svg {
+    flex-shrink: 0;           /* Prevents the logo from squishing */
+}
+
+.google-signin-btn span {
+    white-space: nowrap;      /* Keeps the text on one line */
+}
