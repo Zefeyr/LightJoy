@@ -72,7 +72,7 @@ pub struct PortRange {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            credentials: Some("default".to_string()),
+            credentials: Some("user".to_string()),
             data_path: data_path_default(),
             bind_address: default_bind_address(),
             moonlight_default_http_port: moonlight_default_http_port_default(),
