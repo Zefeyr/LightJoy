@@ -62,6 +62,10 @@ async fn main2() -> Result<(), anyhow::Error> {
 
         return Ok(());
     }
+
+    // Ensure streamer exists
+    ensure_streamer_exists(&config).await?;
+
     let credentials = Data::new(ApiCredentials {
         credentials: config.credentials.clone(),
     });
@@ -130,4 +134,27 @@ where
         }
         Err(err) => panic!("failed to read file: {err}"),
     }
+}
+
+async fn ensure_streamer_exists(config: &Config) -> Result<(), anyhow::Error> {
+    if !Path::new(&config.streamer_path).exists() {
+        info!("Streamer binary not found at {:?}. Attempting to build...", config.streamer_path);
+        
+        let status = tokio::process::Command::new("cargo")
+            .args(&["build", "--release", "--bin", "streamer"])
+            .current_dir("../../") // Assuming running from web-server dir, need to go up to workspace root
+            .status()
+            .await?;
+
+        if !status.success() {
+            return Err(anyhow::anyhow!("Failed to build streamer binary"));
+        }
+        
+        if !Path::new(&config.streamer_path).exists() {
+             return Err(anyhow::anyhow!("Streamer binary still not found after build at {:?}", config.streamer_path));
+        }
+        
+        info!("Streamer binary built successfully.");
+    }
+    Ok(())
 }

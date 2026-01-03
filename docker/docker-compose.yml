@@ -1,0 +1,20 @@
+services:
+  lightjoy:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: lightjoy:latest
+    container_name: lightjoy
+    ports:
+      - "8080:8080"
+      - "47984:47984"
+      - "47989:47989"
+      - "48010:48010"
+      - "47998:47998/udp"
+      - "47999:47999/udp"
+      - "48000:48000/udp"
+    volumes:
+      - ../server-data:/app/server
+    restart: unless-stopped
+    environment:
+      - RUST_LOG=info

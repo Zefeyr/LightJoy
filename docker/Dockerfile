@@ -1,30 +1,84 @@
+# Stage 1: Build Frontend
+FROM node:20-bookworm-slim AS frontend-builder
+
+WORKDIR /app
+
+# Install git for submodules (if needed globally, though we copy files)
+RUN apt-get update && apt-get install -y git
+
+# Copy entire repository to ensure submodules and relative paths work
+COPY . .
+
+# Initialize submodules (just in case they weren't copied correctly or are needed)
+# Note: config says "git submodule update", so we do it to be safe.
+# If .git is excluded, this fails, so we assume .git is part of context.
+# However, for safety if .git is huge, we often rely on pre-checkout.
+# But user insisted on the command.
+RUN git submodule update --init --recursive
+
+# Build Frontend
+WORKDIR /app/moonlight-web/web-server
+RUN npm install
+RUN npm run build
+
+# Stage 2: Build Backend
+FROM rust:bookworm AS backend-builder
+
+WORKDIR /app
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    clang \
+    libssl-dev \
+    pkg-config \
+    git \
+    protobuf-compiler
+
+# Copy source from previous stage (or fresh copy)
+COPY . .
+
+# Ensure submodules (again, to be safe for Rust build if it depends on them)
+RUN git submodule update --init --recursive
+
+# Build Streamer (Explicit User Request)
+RUN cargo build --release --bin streamer
+
+# Build Web Server
+WORKDIR /app/moonlight-web/web-server
+RUN cargo build --release --bin web-server
+
+# Stage 3: Runtime
 FROM debian:bookworm-slim
 
-ENV MOONLIGHT_WEB_PATH=/moonlight-web
+WORKDIR /app
 
-# Create / Go to app directory
-WORKDIR ${MOONLIGHT_WEB_PATH}
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    openssl \
+    libssl3 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-# Download the release binary
-ADD https://github.com/MrCreativ3001/moonlight-web-stream/releases/download/v1.6/moonlight-web-x86_64-unknown-linux-gnu.tar.gz /tmp/app.tar.gz
+# Copy Binaries
+COPY --from=backend-builder /app/target/release/web-server /app/web-server
+COPY --from=backend-builder /app/target/release/streamer /app/streamer
 
-# Extract it
-RUN tar -xvzf /tmp/app.tar.gz --strip-components=1 -C ${MOONLIGHT_WEB_PATH}/ &&\
-    rm /tmp/app.tar.gz
+# Copy Frontend Assets
+COPY --from=frontend-builder /app/moonlight-web/web-server/dist /app/dist
 
-# Create a location with config defaults
-RUN mkdir ${MOONLIGHT_WEB_PATH}/defaults
-COPY ./default-config.json ${MOONLIGHT_WEB_PATH}/defaults/config.json
+# Copy Entrypoint
+COPY docker/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
-# Create a volume with the default config.json and data.json
-VOLUME ${MOONLIGHT_WEB_PATH}/server
+# Expose Ports
+# 8080: Web Interface
+# 47984: HTTPS Control
+# 47989: HTTP Control/Pairing
+# 48010: RTSP
+# 47998-48000: Video/Audio Streams (UDP)
+EXPOSE 8080 47984 47989 48010 47998 47999 48000/udp
 
-# Expose the port (adjust if you changed the config)
-EXPOSE 8080 40000-40100/udp
+# Define Volume for Config/Data
+VOLUME ["/app/server"]
 
-# Create an entrypoint
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-# Run the binary
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/app/entrypoint.sh"]

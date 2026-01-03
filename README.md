@@ -46,24 +46,47 @@ It hosts a Web Server which forwards [Sunshine](https://docs.lizardbyte.dev/proj
 
 ## Docker Deployment (Recommended)
 
-1. **Install Docker** on your host machine.
-2. In the project root, run:
-   ```sh
-   docker compose up --build
-   ```
-3. Access the web interface at `http://localhost:8080`.
+
+1.  **Install Docker** on your host machine.
+2.  Navigate to the `docker` directory:
+    ```bash
+    cd docker
+    ```
+3.  Run the container:
+    ```bash
+    docker compose up --build
+    ```
+4.  Access the web interface at `https://localhost:8080`.
+
+For more details, see [docker/README.md](docker/README.md).
+
 
 ## Installation (Manual)
 
-1. Install [Sunshine](https://github.com/LizardByte/Sunshine/blob/v2025.628.4510/docs/getting_started.md)
 
-2. [Build it yourself](#building) from the source code.
+1.  **Clone the repository** (ensure submodules are included):
+    ```bash
+    git clone --recursive https://github.com/Zefeyr/LightJoy.git
+    # OR if already cloned:
+    git submodule update --init --recursive
+    ```
 
-3. Run the "web-server" executable.
+2.  **Build the Frontend**:
+    ```bash
+    cd moonlight-web/web-server
+    npm install && npm run build
+    cd ../..
+    ```
 
-4. Change your [access credentials](#credentials) in the newly generated `server/config.json` (all changes require a restart).
+3.  **Run the Server** (this will also build the backend binaries):
+    ```bash
+    cargo run --release --bin web-server
+    ```
 
-5. Go to `localhost:8080` and view the web interface. You can also the change [bind address](#bind-address).
+4.  Change your [access credentials](#credentials) in the newly generated `server/config.json` (requires restart).
+
+5.  Go to `https://localhost:8080` (or `http` if configured).
+
 
 ## Setup
 
@@ -348,54 +371,7 @@ Will always append the prefix to all requests made by the website.
 - Thanks to [@Argon2000](https://github.com/Argon2000) for implementing a canvas renderer, which makes this run in the Tesla browser.
 
 ## Building
-Make sure you've cloned this repo with all it's submodules
-```sh
-git clone --recursive https://github.com/MrCreativ3001/moonlight-web-stream.git
-```
-A [Rust](https://www.rust-lang.org/tools/install) [nightly](https://rust-lang.github.io/rustup/concepts/channels.html) installation is required.
 
-There are 2 ways to build Moonlight Web:
-- Build it on your system
+See [Installation (Manual)](#installation-manual) for the quick build commands.
 
-  When you want to build it on your system take a look at how to compile the crates:
-  - [moonlight common sys](#crate-moonlight-common-sys)
-  - [moonlight web server](#crate-moonlight-web-server)
-  - [moonlight web streamer](#crate-moonlight-web-streamer)
-
-- Compile using [Cargo Cross](https://github.com/cross-rs/cross)
-
-  After you've got a successful installation of cross just run the command in the project root directory
-  This will compile the [web server](#crate-moonlight-web-server) and the [streamer](#crate-moonlight-web-streamer)
-  ```sh
-  cross build --release --target YOUR_TARGET
-  ```
-  Note: windows only has the gnu target `x86_64-pc-windows-gnu`
-
-### Crate: Moonlight Common Sys
-[moonlight-common-sys](./moonlight-common-sys/) are rust bindings to the cpp [moonlight-common-c](https://github.com/moonlight-stream/moonlight-common-c) library.
-
-Required for building:
-- A [CMake installation](https://cmake.org/download/) which will automatically compile the [moonlight-common-c](https://github.com/moonlight-stream/moonlight-common-c) library
-- [openssl-sys](https://docs.rs/openssl-sys/0.9.109/openssl_sys/): For information on building openssl sys go to the [openssl docs](https://docs.rs/openssl/latest/openssl/)
-- A [bindgen installation](https://rust-lang.github.io/rust-bindgen/requirements.html) for generating the bindings to the [moonlight-common-c](https://github.com/moonlight-stream/moonlight-common-c) library
-
-### Crate: Moonlight Web Server
-This is the web server for Moonlight Web found at `moonlight-web/web-server/`.
-It'll spawn a multiple [streamers](#crate-moonlight-web-server) as a subprocess for handling each stream.
-
-Required for building:
-- [moonlight-common-sys](#moonlight-common-sys)
-
-Build the web frontend with [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
-```sh
-npm install
-npm run build
-```
-The build output will be in `moonlight-web/web-server/dist`. The dist folder needs to be called `static` and in the same directory as the web server executable.
-
-### Crate: Moonlight Web Streamer
-This is the streamer subprocess of the [web server](#crate-moonlight-web-server) and found at `moonlight-web/streamer/`.
-It'll communicate via stdin and stdout with the web server to negotiate the WebRTC peers and then continue to communicate via the peer.
-
-Required for building:
-- [moonlight-common-sys](#moonlight-common-sys)
+For cross-compilation or detailed crate information, see previous documentation or the `moonlight-web` repository.
