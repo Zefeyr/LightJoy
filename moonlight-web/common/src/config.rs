@@ -93,7 +93,7 @@ fn data_path_default() -> String {
 }
 
 fn default_bind_address() -> SocketAddr {
-    SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::LOCALHOST, 8080))
+    SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 8080))
 }
 
 fn moonlight_default_http_port_default() -> u16 {
@@ -145,8 +145,8 @@ fn default_streamer_path() -> String {
 
     // Developer-friendly fallback: check target/release path for the streamer binary.
     if cfg!(windows) {
-        "./target/release/streamer.exe".to_string()
+        "../../target/release/streamer.exe".to_string()
     } else {
-        "./streamer".to_string()
+        "../../target/release/streamer".to_string()
     }
 }

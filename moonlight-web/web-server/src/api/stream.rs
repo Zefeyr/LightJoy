@@ -30,6 +30,7 @@ pub async fn start_host(
     request: HttpRequest,
     payload: Payload,
 ) -> Result<HttpResponse, Error> {
+    info!("[Stream]: Request received for host/stream from: {:?}", request.connection_info());
     let (response, mut session, mut stream) = actix_ws::handle(&request, payload)?;
 
     actix_rt::spawn(async move {

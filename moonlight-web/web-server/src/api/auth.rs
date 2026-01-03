@@ -6,7 +6,7 @@ use actix_web::{
     middleware::Next,
     web::Data,
 };
-use log::{error, warn};
+use log::{error, warn, info};
 
 #[derive(Clone)]
 pub struct ApiCredentials {
@@ -17,6 +17,7 @@ pub async fn auth_middleware(
     req: ServiceRequest,
     next: Next<BoxBody>,
 ) -> Result<ServiceResponse<impl MessageBody>, Error> {
+    info!("[Auth]: Checking request: {} {}", req.method(), req.path());
     if req.uri().path() == "/api/host/stream" {
         // This will route the stream web socket through
         // because web socket cannot have the auth header
@@ -61,6 +62,7 @@ impl ApiCredentials {
 
         let Some((auth_type, request_credentials)) = value.split_once(" ") else {
             warn!("[Auth] Received malformed Authorization header!");
+            info!("[Auth] Malformed header value: {}", value);
             return Err(HttpResponse::BadRequest().finish());
         };
 

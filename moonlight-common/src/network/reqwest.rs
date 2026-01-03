@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use bytes::Bytes;
-use log::debug;
+use log::{debug, info};
 use pem::Pem;
 use reqwest::{Certificate, Client, ClientBuilder, Identity};
 use thiserror::Error;
@@ -48,6 +48,7 @@ fn build_url(
     let url = Url::parse_with_params(&authority, query_params)?;
 
     debug!("Request: {url}");
+    info!("Building Request URL: {url}");
 
     Ok(url)
 }
@@ -97,6 +98,7 @@ impl RequestClient for Client {
         query_params: &QueryParamsRef<'_>,
     ) -> Result<Self::Text, Self::Error> {
         let url = build_url(false, hostport, path, query_params)?;
+        info!("Sending HTTP Text Request to: {}", url);
         Ok(self.get(url).send().await?.text().await?)
     }
 
@@ -107,6 +109,7 @@ impl RequestClient for Client {
         query_params: &QueryParamsRef<'_>,
     ) -> Result<Self::Text, Self::Error> {
         let url = build_url(true, hostport, path, query_params)?;
+        info!("Sending HTTPS Text Request to: {}", url);
         Ok(self.get(url).send().await?.text().await?)
     }
 
@@ -117,6 +120,7 @@ impl RequestClient for Client {
         query_params: &QueryParamsRef<'_>,
     ) -> Result<Self::Bytes, Self::Error> {
         let url = build_url(true, hostport, path, query_params)?;
+        info!("Sending HTTPS Data Request to: {}", url);
         Ok(self.get(url).send().await?.bytes().await?)
     }
 }

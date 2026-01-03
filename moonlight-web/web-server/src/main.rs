@@ -1,12 +1,16 @@
-use common::config::Config;
+use common::config::{Config, ConfigSsl};
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
+use openssl::rsa::Rsa;
+use openssl::x509::X509;
+use openssl::asn1::Asn1Time;
+use openssl::pkey::PKey;
 use std::{io::ErrorKind, path::Path};
 use tokio::{
     fs,
     io::{AsyncBufReadExt, BufReader, stdin},
 };
 
-use actix_web::{App, HttpServer, web::Data};
+use actix_web::{App, HttpServer, web::Data, dev::Service};
 use log::{LevelFilter, info};
 use serde::{Serialize, de::DeserializeOwned};
 use simplelog::{ColorChoice, TermLogger, TerminalMode};
@@ -56,7 +60,7 @@ async fn exit() -> Result<(), anyhow::Error> {
 
 async fn main2() -> Result<(), anyhow::Error> {
     // Load Config
-    let config = read_or_default::<Config>("./server/config.json").await;
+    let mut config = read_or_default::<Config>("./server/config.json").await;
     if config.credentials.as_deref() == Some("default") {
         info!("Enter your credentials in the config (server/config.json)");
 
@@ -64,7 +68,10 @@ async fn main2() -> Result<(), anyhow::Error> {
     }
 
     // Ensure streamer exists
-    ensure_streamer_exists(&config).await?;
+    ensure_streamer_exists(&mut config).await?;
+    
+    // Ensure certificates exist
+    ensure_certificates_exist(&mut config).await?;
 
     let credentials = Data::new(ApiCredentials {
         credentials: config.credentials.clone(),
@@ -84,6 +91,10 @@ async fn main2() -> Result<(), anyhow::Error> {
             App::new()
                 .app_data(config.clone())
                 .app_data(credentials.clone())
+                .wrap_fn(|req, srv| {
+                    info!("[Middleware] Incoming: {} {} Headers: {:?}", req.method(), req.path(), req.headers());
+                    srv.call(req)
+                })
                 .service(api_service(data.clone()))
                 .service(web_config_js_service())
                 .service(web_service())
@@ -136,25 +147,104 @@ where
     }
 }
 
-async fn ensure_streamer_exists(config: &Config) -> Result<(), anyhow::Error> {
-    if !Path::new(&config.streamer_path).exists() {
-        info!("Streamer binary not found at {:?}. Attempting to build...", config.streamer_path);
-        
-        let status = tokio::process::Command::new("cargo")
-            .args(&["build", "--release", "--bin", "streamer"])
-            .current_dir("../../") // Assuming running from web-server dir, need to go up to workspace root
-            .status()
-            .await?;
-
-        if !status.success() {
-            return Err(anyhow::anyhow!("Failed to build streamer binary"));
-        }
-        
-        if !Path::new(&config.streamer_path).exists() {
-             return Err(anyhow::anyhow!("Streamer binary still not found after build at {:?}", config.streamer_path));
-        }
-        
-        info!("Streamer binary built successfully.");
+async fn ensure_streamer_exists(config: &mut Config) -> Result<(), anyhow::Error> {
+    if Path::new(&config.streamer_path).exists() {
+        return Ok(());
     }
+
+    // Check workspace default location fallback
+    let workspace_target = if cfg!(windows) {
+        "../../target/release/streamer.exe"
+    } else {
+        "../../target/release/streamer"
+    };
+
+    if Path::new(workspace_target).exists() {
+        info!("Streamer binary found at workspace target: {}. Updating config.", workspace_target);
+        config.streamer_path = workspace_target.to_string();
+        
+        // Save the updated config to file
+        let value_str = serde_json::to_string_pretty(&config).expect("failed to serialize config");
+        tokio::fs::write("./server/config.json", value_str).await.expect("failed to update config file");
+        
+        return Ok(());
+    }
+
+    info!("Streamer binary not found at {:?} or {}. Attempting to build...", config.streamer_path, workspace_target);
+    
+    let status = tokio::process::Command::new("cargo")
+        .args(&["build", "--release", "--bin", "streamer"])
+        .current_dir("../../") // Assuming running from web-server dir, need to go up to workspace root
+        .status()
+        .await?;
+
+    if !status.success() {
+        return Err(anyhow::anyhow!("Failed to build streamer binary"));
+    }
+    
+    if Path::new(&config.streamer_path).exists() {
+         info!("Streamer binary built successfully at configured path.");
+         return Ok(());
+    }
+
+    if Path::new(workspace_target).exists() {
+         info!("Streamer binary built successfully at workspace target. Updating config.");
+         config.streamer_path = workspace_target.to_string();
+         
+         // Save the updated config to file
+         let value_str = serde_json::to_string_pretty(&config).expect("failed to serialize config");
+         tokio::fs::write("./server/config.json", value_str).await.expect("failed to update config file");
+         
+         return Ok(());
+    }
+    
+    Err(anyhow::anyhow!("Streamer binary still not found after build at {:?} or {}", config.streamer_path, workspace_target))
+}
+
+async fn ensure_certificates_exist(config: &mut Config) -> Result<(), anyhow::Error> {
+    if config.certificate.is_some() {
+        return Ok(());
+    }
+
+    info!("Certificates not found in config. Generating self-signed certificates...");
+
+    // Generate Key
+    let rsa = Rsa::generate(2048)?;
+    let pkey = PKey::from_rsa(rsa)?;
+    
+    let private_key_pem = String::from_utf8(pkey.private_key_to_pem_pkcs8()?)?;
+
+    // Generate Cert
+    let mut x509 = X509::builder()?;
+    x509.set_version(2)?;
+    x509.set_pubkey(&pkey)?; 
+    
+    // Valid for 1 year
+    let not_before = Asn1Time::days_from_now(0)?;
+    let not_after = Asn1Time::days_from_now(365)?;
+    x509.set_not_before(&not_before)?;
+    x509.set_not_after(&not_after)?;
+    
+    // Self-signed with the same key
+    x509.sign(&pkey, openssl::hash::MessageDigest::sha256())?;
+    
+    let certificate_pem = String::from_utf8(x509.build().to_pem()?)?;
+
+    // Create certs directory
+    tokio::fs::create_dir_all("./server/certs").await?;
+    tokio::fs::write("./server/certs/key.pem", &private_key_pem).await?;
+    tokio::fs::write("./server/certs/cert.pem", &certificate_pem).await?;
+
+    config.certificate = Some(ConfigSsl {
+        private_key_pem: "./server/certs/key.pem".to_string(),
+        certificate_pem: "./server/certs/cert.pem".to_string(),
+    });
+
+    info!("Generated self-signed certificates at ./server/certs/");
+
+    // Save the updated config to file
+    let value_str = serde_json::to_string_pretty(&config).expect("failed to serialize config");
+    tokio::fs::write("./server/config.json", value_str).await.expect("failed to update config file");
+
     Ok(())
 }
