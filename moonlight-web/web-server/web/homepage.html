@@ -20,6 +20,9 @@
 </head>
 
 <body>
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+    </div>
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-transparent">
         <div class="navbar-container container-fluid px-4">
@@ -56,7 +59,7 @@
                                 <hr class="dropdown-divider" style="background-color: #ce93d8;">
                             </li>
                             <li><a class="dropdown-item" href="account.html">Account Settings</a></li>
-                            <li><a class="dropdown-item" href="#">My Games</a></li>
+                            <li><a class="dropdown-item" href="app.html">My Games</a></li>
                             <li>
                                 <hr class="dropdown-divider" style="background-color: #ce93d8;">
                             </li>
@@ -72,10 +75,11 @@
 
     <!-- Hero Section -->
     <section id="home" class="hero">
-        <div class="hero-content">
-            <h1 class="hero-title">Welcome to LightJoy</h1>
-            <p class="hero-subtitle">Stream your favorite games anywhere, anytime with zero latency</p>
-            <a href="app.html" class="cta-button">Start Gaming Now</a>
+        <div class="hero-content scroll-hidden">
+            <h1 class="hero-title">LightJoy Web Client</h1>
+            <p class="hero-subtitle">Stream your PC games to any device via Moonlight. Low latency, high performance.
+            </p>
+            <a href="app.html" class="cta-button">Start Streaming</a>
         </div>
         <div class="hero-background">
             <div class="gradient-circle circle-1"></div>
@@ -86,34 +90,34 @@
     <!-- Features Section -->
     <section id="features" class="features">
         <div class="features-container">
-            <h2 class="section-title">Why Choose LightJoy?</h2>
+            <h2 class="section-title scroll-hidden">Why Choose LightJoy?</h2>
             <div class="features-grid">
-                <div class="feature-card">
+                <div class="feature-card scroll-hidden">
                     <div class="feature-icon">🎮</div>
                     <h3>Ultra Low Latency</h3>
                     <p>Experience gaming with minimal delay, perfect for competitive play</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card scroll-hidden stagger-1">
                     <div class="feature-icon">⚡</div>
                     <h3>Blazing Fast</h3>
                     <p>Stream high-quality games at optimal performance on any device</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card scroll-hidden stagger-2">
                     <div class="feature-icon">🔒</div>
                     <h3>Secure & Private</h3>
                     <p>Your gaming sessions are encrypted and completely private</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card scroll-hidden">
                     <div class="feature-icon">📱</div>
                     <h3>Cross Platform</h3>
                     <p>Play on any device - PC, tablet, or smartphone</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card scroll-hidden stagger-1">
                     <div class="feature-icon">🌍</div>
                     <h3>Community Hub</h3>
                     <p>Reach other players and build your gaming community</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card scroll-hidden stagger-2">
                     <div class="feature-icon">💪</div>
                     <h3>Powerful Performance</h3>
                     <p>Stream games in 4K with high refresh rates</p>
@@ -126,15 +130,15 @@
     <section id="about" class="about">
         <div class="about-container">
             <div class="about-content">
-                <h2 class="section-title">About LightJoy</h2>
-                <p class="about-text">
+                <h2 class="section-title scroll-hidden">About LightJoy</h2>
+                <p class="about-text scroll-hidden">
                     LightJoy is a cutting-edge cloud gaming platform that brings console-quality gaming to your
                     fingertips.
                     Built on advanced streaming technology, we deliver an unparalleled gaming experience with minimal
                     latency
                     and maximum performance.
                 </p>
-                <p class="about-text">
+                <p class="about-text scroll-hidden stagger-1">
                     Whether you're a casual gamer or a hardcore enthusiast, LightJoy provides the infrastructure and
                     tools
                     to play your favorite games anywhere, on any device. Our mission is to democratize gaming by
@@ -142,22 +146,22 @@
                     hardware barriers and letting you focus on what matters most - enjoying great games.
                 </p>
                 <div class="about-stats">
-                    <div class="stat">
+                    <div class="stat scroll-hidden">
                         <h4>100+</h4>
                         <p>Games Available</p>
                     </div>
-                    <div class="stat">
+                    <div class="stat scroll-hidden stagger-1">
                         <h4>50ms</h4>
                         <p>Average Latency</p>
                     </div>
-                    <div class="stat">
+                    <div class="stat scroll-hidden stagger-2">
                         <h4>24/7</h4>
                         <p>Support</p>
                     </div>
                 </div>
             </div>
             <div class="about-visual">
-                <div class="gaming-illustration">
+                <div class="gaming-illustration scroll-hidden">
                     🎮✨
                 </div>
             </div>
@@ -166,7 +170,7 @@
 
     <!-- Call to Action Section -->
     <section class="cta-section">
-        <div class="cta-content">
+        <div class="cta-content scroll-hidden">
             <h2>Ready to Experience Cloud Gaming?</h2>
             <p>Join thousands of gamers enjoying LightJoy today</p>
             <a href="app.html" class="cta-button-large">Play Now</a>
@@ -197,6 +201,26 @@
                     target.scrollIntoView({ behavior: 'smooth' });
                 }
             });
+        });
+
+        // Scroll Animations
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('scroll-show');
+                    observer.unobserve(entry.target); // Only animate once
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-hidden').forEach((el) => {
+            observer.observe(el);
         });
     </script>
     <script type="module" src="firebase-init.js"></script>

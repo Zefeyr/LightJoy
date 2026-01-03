@@ -1,8 +1,0 @@
-{
-    "credentials": "denih",
-    "bind_address": "0.0.0.0:8080",
-    "certificate": {
-        "private_key_pem": "./cert/key.pem",
-        "certificate_pem": "./cert/cert.pem"
-    }
-}

@@ -18,7 +18,10 @@ export class Host implements Component {
 
     private imageElement: HTMLImageElement = document.createElement("img")
     private imageOverlayElement: HTMLImageElement = document.createElement("img")
-    private nameElement: HTMLElement = document.createElement("p")
+
+    private infoElement: HTMLDivElement = document.createElement("div") // Wrapper
+    private nameElement: HTMLElement = document.createElement("h3") // p -> h3
+    private statusElement: HTMLElement = document.createElement("p") // New status text
 
     constructor(api: Api, hostId: number, host: UndetailedHost | DetailedHost | null) {
         this.api = api
@@ -33,13 +36,19 @@ export class Host implements Component {
         // Configure image overlay
         this.imageOverlayElement.classList.add("host-image-overlay")
 
-        // Configure name
+        // Configure Layout
+        this.divElement.classList.add("host-card") // New class
+        this.infoElement.classList.add("host-info")
         this.nameElement.classList.add("host-name")
+        this.statusElement.classList.add("host-status")
+
+        this.infoElement.appendChild(this.nameElement)
+        this.infoElement.appendChild(this.statusElement)
 
         // Append elements
         this.divElement.appendChild(this.imageElement)
         this.divElement.appendChild(this.imageOverlayElement)
-        this.divElement.appendChild(this.nameElement)
+        this.divElement.appendChild(this.infoElement)
 
         this.divElement.addEventListener("click", this.onClick.bind(this))
         this.divElement.addEventListener("contextmenu", this.onContextMenu.bind(this))
@@ -236,10 +245,19 @@ export class Host implements Component {
 
         if (this.cache.server_state == null) {
             this.imageOverlayElement.src = HOST_OVERLAY_OFFLINE
+            this.statusElement.innerText = "Offline"
+            this.statusElement.style.color = "#ff5252"
+            this.imageOverlayElement.style.display = "block"
         } else if (this.cache.paired != "Paired") {
             this.imageOverlayElement.src = HOST_OVERLAY_LOCK
+            this.statusElement.innerText = "Locked (Click to Pair)"
+            this.statusElement.style.color = "#faa61a"
+            this.imageOverlayElement.style.display = "block"
         } else {
             this.imageOverlayElement.src = HOST_OVERLAY_NONE
+            this.statusElement.innerText = "Online"
+            this.statusElement.style.color = "#43b581"
+            this.imageOverlayElement.style.display = "none"
         }
     }
 

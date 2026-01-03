@@ -317,8 +317,15 @@ body {
 }
 
 @keyframes float-home {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
 }
 
 /* CTA Section */
@@ -409,12 +416,38 @@ body {
     color: var(--primary-color);
 }
 
+/* Scroll Animations */
+.scroll-hidden {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s ease-out;
+}
+
+.scroll-show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.stagger-1 {
+    transition-delay: 100ms;
+}
+
+.stagger-2 {
+    transition-delay: 200ms;
+}
+
+.stagger-3 {
+    transition-delay: 300ms;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .navbar-container {
         flex-direction: column;
         gap: 1rem;
     }
+
+    /* Rest of the responsive block unchanged... */
 
     .nav-links {
         flex-direction: column;
@@ -521,17 +554,25 @@ body {
 }
 
 /* General Button Overrides */
-.btn-primary, .btn-secondary, .btn-settings{
-    display: inline-flex;    /* Keeps the button width flexible but content aligned */
-    align-items: center;     /* Centers logo and text vertically */
-    justify-content: center;  /* Centers logo and text horizontally */
-    gap: 10px;               /* Precise spacing between logo and text */
-    
+.btn-primary,
+.btn-secondary,
+.btn-settings {
+    display: inline-flex;
+    /* Keeps the button width flexible but content aligned */
+    align-items: center;
+    /* Centers logo and text vertically */
+    justify-content: center;
+    /* Centers logo and text horizontally */
+    gap: 10px;
+    /* Precise spacing between logo and text */
+
     /* RESET PADDING */
-    padding: 10px 20px;      /* Ensure equal padding on all sides */
-    
+    padding: 10px 20px;
+    /* Ensure equal padding on all sides */
+
     /* PREVENT SQUISHING */
-    white-space: nowrap;     /* Stops the word 'Settings' from wrapping */
+    white-space: nowrap;
+    /* Stops the word 'Settings' from wrapping */
     padding: 10px 80px;
     border-radius: 8px;
     border: none;
@@ -540,7 +581,7 @@ body {
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    
+
 }
 
 /* Add Host Button */
@@ -596,6 +637,229 @@ body {
 
 .btn-home:hover {
     background: rgba(255, 255, 255, 0.1);
-    border-color: #4285F4; /* Highlight with Google Blue on hover */
+    border-color: #4285F4;
+    /* Highlight with Google Blue on hover */
     transform: translateY(-2px);
+}
+
+/* Loading Overlay */
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--dark-bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255, 255, 255, 0.1);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* --- App Interface Redesign (Game/Host Cards) --- */
+
+/* Game Card - RESTORED GRID LOOK WITH OVERLAY */
+.game-card {
+    position: relative;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    /* Force dimensions to match original app-image */
+    width: 200px;
+    height: 266px;
+    margin: 10px;
+    /* Match original gap/margin if needed, though flex gap handles it */
+}
+
+/* Ensure image fills the card */
+.game-card .app-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.game-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+}
+
+/* Details Overlay - Originally hidden, shows on hover */
+.game-details {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    /* Dark overlay */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* Center buttons vertically */
+    align-items: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(2px);
+}
+
+.game-card:hover .game-details {
+    opacity: 1;
+}
+
+.game-title {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #fff;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    position: absolute;
+    top: 20px;
+    width: 100%;
+    padding: 0 10px;
+}
+
+.btn-play {
+    width: 80%;
+    padding: 12px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s, background 0.2s;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+    font-size: 1rem;
+}
+
+.btn-play:hover {
+    background: #0056b3;
+    transform: scale(1.05);
+}
+
+.btn-join {
+    background: #43b581 !important;
+    /* Green */
+    box-shadow: 0 4px 15px rgba(67, 181, 129, 0.4);
+}
+
+.btn-join:hover {
+    background: #369b6e !important;
+}
+
+.btn-play:disabled {
+    background: #444;
+    cursor: not-allowed;
+    color: #888;
+    box-shadow: none;
+}
+
+/* Host Card - Reverting to Clean Monitor Grid (Client Requirement) */
+.host-card {
+    background: transparent;
+    /* No card background */
+    border: none;
+    border-radius: 10px;
+    overflow: visible;
+    /* Allow tooltips if needed */
+    transition: 0.2s;
+    display: flex;
+    flex-direction: column;
+    /* Vertical stack: Icon top, Text bottom */
+    cursor: pointer;
+    width: 250px;
+    align-items: center;
+    padding: 15px;
+    gap: 10px;
+}
+
+.host-card:hover {
+    box-shadow: none;
+    border-color: transparent;
+    transform: translateY(-2px);
+}
+
+.host-card:hover .host-image {
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+    transform: scale(1.05);
+}
+
+.host-image,
+.host-image-overlay {
+    width: 120px !important;
+    /* Large icon */
+    height: 120px !important;
+    border-radius: 0;
+    object-fit: contain;
+    /* Keep SVG aspect ratio */
+    aspect-ratio: auto;
+    transition: all 0.2s ease;
+}
+
+.host-image-overlay {
+    position: absolute;
+    width: 32px !important;
+    height: 32px !important;
+    bottom: 40px;
+    /* Adjust based on new height */
+    right: 60px;
+    /* Roughly corner of the monitor icon */
+    left: auto;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    z-index: 2;
+}
+
+.host-card {
+    position: relative;
+    /* Context for absolute badge */
+}
+
+.host-info {
+    flex: 0;
+    text-align: center;
+    background: transparent;
+    padding: 0;
+    width: 100%;
+}
+
+.host-name {
+    font-size: 1.4rem;
+    font-weight: 400;
+    /* Cleaner font weight */
+    margin-bottom: 5px;
+    color: white;
+    text-align: center;
+}
+
+.host-status {
+    font-size: 0.9rem;
+    font-weight: 300;
+    opacity: 0.7;
+    margin-top: 5px;
 }

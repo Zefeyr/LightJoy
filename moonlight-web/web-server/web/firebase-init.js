@@ -2,17 +2,20 @@
 
 // Import necessary functions from the SDKs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
-import { 
-    getAuth, 
-    signInWithEmailAndPassword, 
+import {
+    getAuth,
+    signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
     onAuthStateChanged,
     signOut,
     GoogleAuthProvider,
     signInWithPopup,
-    updateProfile
+    updateProfile,
+    setPersistence,
+    browserSessionPersistence,
+    browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
 // Your web app's Firebase configuration
@@ -39,14 +42,19 @@ export const db = getFirestore(app);   // MUST EXPORT THIS
 export const googleProvider = new GoogleAuthProvider();
 
 // Export the specific functions needed for app logic
-export { 
-    signInWithEmailAndPassword, 
-    createUserWithEmailAndPassword, 
+export {
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
     onAuthStateChanged,
     signOut,
     signInWithPopup,
     updateProfile,
     doc,
     setDoc,
-    getDoc // Added signOut for future use on index.html
+    getDoc,
+    setPersistence,
+    browserSessionPersistence,
+    browserLocalPersistence,
+    updateDoc,
+    serverTimestamp
 };

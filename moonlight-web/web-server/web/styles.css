@@ -391,31 +391,72 @@ input[type=number] {
 .actions-list {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: flex-end;
+    /* Push items to right, or space-between if we want left/right split */
+    align-items: center;
+    gap: 15px;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 20px;
 }
 
-/** Settings */
+/** Common Button Styling */
+.host-add,
+.open-settings,
+.btn-home {
+    cursor: pointer;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.host-add:hover,
+.open-settings:hover,
+.btn-home:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/** Specific Icons */
 .open-settings {
     background-image: url("resources/settings.svg");
     background-position: center;
     background-repeat: no-repeat;
-    background-size: 60px;
-    width: 70px;
-    height: 70px;
+    background-size: 30px;
+    /* Smaller, cleaner */
+    width: 50px;
+    height: 50px;
 }
 
-.settings {
-    color: white;
-}
-
-/** Hosts */
 .host-add {
     background-image: url("resources/ic_add_to_queue_white_48px.svg");
     background-position: center;
     background-repeat: no-repeat;
-    background-size: 60px;
-    width: 70px;
-    height: 70px;
+    background-size: 30px;
+    width: 50px;
+    height: 50px;
+}
+
+/** Home Button */
+.btn-home {
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0 20px;
+    height: 50px;
+    font-size: 1rem;
+    margin-right: auto;
+    /* Pushes other buttons to the right */
+}
+
+.settings {
+    color: white;
 }
 
 .host-list {
@@ -565,4 +606,43 @@ canvas.video-stream {
 /* Prevent starting animation for elements */
 .prevent-start-transition {
     transition: none;
+}
+
+/* UI Fixes */
+.app-title {
+    margin-left: 20px;
+}
+
+/* Fix Modal Overflow */
+.modal-content {
+    background-color: rgb(86, 92, 100);
+    margin: 10vh auto;
+    /* Use vh for dynamic top margin */
+    padding: 20px;
+    border: 1px solid #888;
+    border-radius: 5px;
+    width: 80%;
+    max-height: 80vh;
+    /* Max height 80% viewport */
+    overflow-y: auto;
+    /* Scroll if content exceeds height */
+}
+
+/* Fix Host Overlay Icon Positioning */
+.host-element {
+    position: relative;
+    /* Ensure absolute children are relative to this */
+}
+
+.host-image-overlay {
+    position: absolute;
+    /* Position it nicely on the monitor screen or corner */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    /* Adjust based on monitor image */
+    width: 32px;
+    height: 32px;
+    pointer-events: none;
+    /* Let clicks pass through */
 }

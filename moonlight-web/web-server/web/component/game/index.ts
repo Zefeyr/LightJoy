@@ -23,6 +23,11 @@ export class Game implements Component {
     private imageBlobUrl: string | null = null
     private imageElement: HTMLImageElement = document.createElement("img")
 
+    // New Elements
+    private detailsElement: HTMLDivElement = document.createElement("div")
+    private titleElement: HTMLElement = document.createElement("h3")
+    private playButton: HTMLButtonElement = document.createElement("button")
+
     private cache: GameCache
 
     constructor(api: Api, hostId: number, appId: number, cache: GameCache) {
@@ -41,8 +46,23 @@ export class Game implements Component {
 
         // Configure div
         this.divElement.classList.add("app")
+        this.divElement.classList.add("game-card") // New class for styling
+
+        // Configure Details
+        this.detailsElement.classList.add("game-details")
+        this.titleElement.classList.add("game-title")
+        this.playButton.classList.add("btn-play")
+
+        this.playButton.addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.onClick(e as any);
+        })
+
+        this.detailsElement.appendChild(this.titleElement)
+        this.detailsElement.appendChild(this.playButton)
 
         this.divElement.appendChild(this.imageElement)
+        this.divElement.appendChild(this.detailsElement)
 
         this.divElement.addEventListener("click", this.onClick.bind(this))
         this.divElement.addEventListener("contextmenu", this.onContextMenu.bind(this))
@@ -84,10 +104,24 @@ export class Game implements Component {
         this.divElement.classList.remove("app-inactive")
         this.divElement.classList.remove("app-active")
 
+        // Update Title
+        this.titleElement.innerText = this.cache.title
+
         if (this.isActive()) {
             this.divElement.classList.add("app-active")
+            this.playButton.innerText = "Join Session"
+            this.playButton.classList.add("btn-join")
+            this.playButton.disabled = false
         } else if (this.cache.activeApp != null) {
             this.divElement.classList.add("app-inactive")
+            this.playButton.innerText = "Busy"
+            this.playButton.classList.remove("btn-join")
+            // this.playButton.disabled = true // Maybe allow clicking to show menu? 
+            // Original logic allowed clicking inactive to show menu.
+        } else {
+            this.playButton.innerText = "Play"
+            this.playButton.classList.remove("btn-join")
+            this.playButton.disabled = false
         }
     }
 

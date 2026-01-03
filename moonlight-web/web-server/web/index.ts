@@ -49,6 +49,7 @@ class MainApp implements Component {
     private actionElement = document.createElement("div")
 
     private backToHostsButton: HTMLButtonElement = document.createElement("button")
+    private homeButton: HTMLAnchorElement = document.createElement("a") // Home Button
 
     private hostAddButton: HTMLButtonElement = document.createElement("button")
     private settingsButton: HTMLButtonElement = document.createElement("button")
@@ -63,7 +64,8 @@ class MainApp implements Component {
         this.api = api
 
         // Moonlight text
-        this.moonlightTextElement.innerHTML = "LightJoys - Moonlight Web (Updated)"
+        this.moonlightTextElement.innerHTML = "LightJoy"
+        this.moonlightTextElement.classList.add("app-title")
 
         // Actions
         this.actionElement.classList.add("actions-list")
@@ -71,6 +73,11 @@ class MainApp implements Component {
         // Back button
         this.backToHostsButton.innerText = "Back"
         this.backToHostsButton.addEventListener("click", () => this.setCurrentDisplay("hosts"))
+
+        // Home button
+        this.homeButton.innerText = "Home"
+        this.homeButton.href = "homepage.html"
+        this.homeButton.classList.add("btn-home") // Add class for styling
 
         // Host add button
         this.hostAddButton.classList.add("host-add")
@@ -180,6 +187,7 @@ class MainApp implements Component {
 
         // Unmount the current display
         if (this.currentDisplay == "hosts") {
+            this.actionElement.removeChild(this.homeButton) // Remove Home button
             this.actionElement.removeChild(this.hostAddButton)
             this.actionElement.removeChild(this.settingsButton)
 
@@ -196,6 +204,7 @@ class MainApp implements Component {
 
         // Mount the new display
         if (display == "hosts") {
+            this.actionElement.appendChild(this.homeButton) // Add Home Button
             this.actionElement.appendChild(this.hostAddButton)
             this.actionElement.appendChild(this.settingsButton)
 

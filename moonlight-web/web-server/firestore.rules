@@ -1,0 +1,56 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+  
+    // Allow users to read/write their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Allow searching users (reading other profiles)
+      allow read: if request.auth != null; 
+      
+      // Allow reading/writing to their own friends subcollection (if used)
+      match /friends/{friendId} {
+         allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // Allow Global Chat
+    match /messages/{messageId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // --- NEW RULES FOR FRIEND SYSTEM ---
+    
+    // Allow Friend Requests
+    match /friend_requests/{requestId} {
+      // Anyone signed in can read/write requests (Logic in app filters correctly)
+      // A more secure rule would filter by 'from' or 'to' uid, but this is enough for the prototype.
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow Direct Messages
+    match /direct_messages/{chatId}/messages/{msgId} {
+        allow read, write: if request.auth != null;
+    }
+
+    // Allow Group Chats
+
+    match /groups/{groupId} {
+      allow read, create: if request.auth != null;
+      
+      // Update Rules:
+      // 1. Owner can update everything.
+      // 2. Admins can update 'members' but NOT 'admins' or 'createdBy'.
+      // 3. (NEW) Anyone can Add themselves (Accept Invite) - Restricted to ONLY adding members (no deletes)
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.createdBy || 
+        (resource.data.admins.hasAny([request.auth.uid]) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['admins', 'createdBy'])) ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members']) && request.resource.data.members.hasAll(resource.data.members))
+      );
+
+      match /messages/{msgId} {
+        allow read, write: if request.auth != null;
+      }
+    }
+  }
+}

@@ -1,22 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LightJoy Community Hub</title>
     <link rel="stylesheet" href="comm.css">
 </head>
+
 <body>
     <div class="hub-wrapper">
         <nav class="hub-sidebar">
-            <div class="sidebar-header">Channels</div>
-            <div class="channel-list">
-                <div class="channel active"># global-chat</div>
-                <div class="channel"># support</div>
-                <div class="channel"># find-players</div>
-                <div class="channel"># patch-notes</div>
+            <!-- SCROLLABLE SECTION -->
+            <div class="sidebar-scroller">
+                <div class="sidebar-header">Channels</div>
+                <div class="channel-list">
+                    <div class="channel active"># global-chat <span id="global-badge" class="badge"></span></div>
+                </div>
+
+                <div class="sidebar-header collapsible-header" id="header-groups"
+                    style="margin-top: 20px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                    <span><span class="arrow">▼</span> Group Chats</span>
+                    <button id="open-create-group"
+                        style="background:transparent; border:none; color:#bbb; font-size:1.2rem; cursor:pointer; padding:0 5px;">+</button>
+                </div>
+                <!-- Group List -->
+                <div id="group-list" class="channel-list" style="flex:none; transition: all 0.3s ease;"></div>
+
+                <div class="sidebar-header collapsible-header" id="header-dms"
+                    style="margin-top: 20px; cursor:pointer;">
+                    <span class="arrow">▼</span> Direct Messages
+                </div>
+                <!-- DM List -->
+                <div id="dm-list" class="user-list" style="flex:none; transition: all 0.3s ease;"></div>
             </div>
-            <button class="btn-home-back" onclick="window.location.href='homepage.html'">← Home</button>
+
+            <div class="sidebar-footer" style="padding: 10px; border-top: 1px solid rgba(255,255,255,0.05);">
+                <button id="open-add-friend" class="btn-add-friend">+ Add Friend</button>
+                <button id="open-requests" class="btn-add-friend"
+                    style="margin-top:5px; background:transparent; border-color:#ce93d8; color:#ce93d8;">
+                    Requests <span id="requests-badge" class="badge"></span>
+                </button>
+                <button class="btn-home-back" onclick="window.location.href='homepage.html'">← Home</button>
+            </div>
         </nav>
 
         <main class="chat-main">
@@ -27,7 +53,7 @@
 
             <div id="chat-messages" class="chat-messages">
                 <div class="message">
-                    
+
                     <div class="message-content">
                         <div class="message-info">
                             <span class="username"></span>
@@ -45,16 +71,88 @@
         </main>
 
         <aside class="online-users">
-            <div class="sidebar-header">Online — 3</div>
-            <div class="user-list">
-                <div class="user-item"><span class="status online"></span> Gamer_Pro</div>
-                <div class="user-item"><span class="status online"></span> Network_Ninja</div>
-                <div class="user-item"><span class="status idle"></span> CloudWatcher</div>
+            <div class="sidebar-header">Online — <span id="online-count">0</span></div>
+            <div id="roster-online" class="user-list" style="flex: 0 0 auto; max-height: 40%;">
+                <!-- Online friends load here -->
+            </div>
+
+            <div class="sidebar-header" style="margin-top: 20px;">All Friends — <span id="friend-count">0</span></div>
+            <div id="roster-offline" class="user-list" style="flex: 1; overflow-y: auto;">
+                <!-- All/Offline friends load here -->
             </div>
         </aside>
+    </div>
+
+    <!-- Add Friend Modal -->
+    <div id="add-friend-modal" class="modal-overlay">
+        <div class="modal">
+            <span id="close-add-friend" class="close-modal">&times;</span>
+            <h3>Add a Friend</h3>
+            <p style="color: #aaa; margin-bottom: 15px;">Enter their username or email</p>
+            <input type="text" id="friend-input" class="modal-input" placeholder="Username or Email">
+            <button id="submit-add-friend" class="modal-btn">Send Request</button>
+        </div>
+    </div>
+
+    <!-- Create Group Modal -->
+    <div id="create-group-modal" class="modal-overlay">
+        <div class="modal">
+            <span id="close-create-group" class="close-modal">&times;</span>
+            <h3 style="margin-bottom: 20px;">Create Group Chat</h3>
+            <input type="text" id="group-name-input" class="modal-input" placeholder="Group Name (e.g. Squad)">
+            <p style="color:#aaa; font-size:0.9rem; margin-top:10px;">Select Friends:</p>
+            <div id="group-friend-list" class="requests-list"
+                style="max-height: 200px; overflow-y: auto; text-align: left;">
+                <!-- Friends checkboxes load here -->
+            </div>
+            <button id="submit-create-group" class="modal-btn" style="margin-top: 20px;">Create Group</button>
+        </div>
+    </div>
+
+    <!-- Group Info Modal -->
+    <div id="group-info-modal" class="modal-overlay">
+        <div class="modal">
+            <span id="close-group-info" class="close-modal">&times;</span>
+            <h3 id="info-group-name" style="margin-bottom: 20px;">Group Info</h3>
+            <p style="color:#aaa; font-size:0.9rem; margin-top:10px;">Members:</p>
+            <div id="info-group-members" class="requests-list"
+                style="max-height: 200px; overflow-y: auto; text-align: left; background: rgba(255,255,255,0.05); padding:10px; border-radius:5px;">
+                <!-- Members load here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Friend Requests Modal -->
+    <div id="requests-modal" class="modal-overlay">
+        <div class="modal">
+            <span id="close-requests" class="close-modal">&times;</span>
+            <h3 style="margin-bottom: 20px;">Friend Requests</h3>
+            <div id="friend-requests-list" class="requests-list">
+                <div style="color:#aaa; text-align:center;">No pending requests</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Member Modal -->
+    <div id="modal-add-member" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Add Members</h3>
+                <span id="close-add-member" class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p style="color:#aaa; font-size:0.9rem; margin-bottom:10px;">Select friends to add:</p>
+                <div id="add-member-list" class="requests-list"
+                    style="max-height: 200px; overflow-y: auto; text-align: left;">
+                    <!-- Checkboxes populated by JS -->
+                </div>
+                <button id="submit-add-member" class="modal-btn" style="margin-top: 20px;">Add Selected</button>
+            </div>
+        </div>
     </div>
 
     <script type="module" src="firebase-init.js"></script>
     <script type="module" src="comm.js"></script>
 </body>
+
 </html>

@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - LightJoy</title>
-    <link rel="stylesheet" href="signup.css"> 
+    <link rel="stylesheet" href="signup.css">
 </head>
+
 <body>
     <a href="index.html" class="nav-link">
         <span class="nav-arrow">&larr;</span> Return
     </a>
 
     <div class="modal-background">
-        
+
         <div class="modal-content signup-form-box">
             <h2>Sign Up</h2>
 
@@ -31,10 +33,19 @@
                     <label for="signup-password">Password:</label>
                     <input type="password" id="signup-password" name="password" class="textlike" required>
                 </div>
-                
+
                 <div class="input-div">
                     <label for="signup-confirm-password">Confirm Password:</label>
-                    <input type="password" id="signup-confirm-password" name="confirm-password" class="textlike" required>
+                    <input type="password" id="signup-confirm-password" name="confirm-password" class="textlike"
+                        required>
+                </div>
+
+                <p style="font-size: 0.85rem; color: #ccc; margin-top: -10px; margin-bottom: 15px;">
+                    Password must be at least 6 characters long.
+                </p>
+
+                <div id="signup-error" class="error-message"
+                    style="color: #ff5252; margin-bottom: 15px; text-align: center; font-weight: bold; display: none;">
                 </div>
 
                 <div class="button-row">
@@ -47,8 +58,9 @@
             </p>
         </div>
     </div>
-    
+
     <script type="module" src="firebase-init.js"></script>
     <script type="module" src="app.js"></script>
 </body>
+
 </html>

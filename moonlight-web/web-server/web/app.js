@@ -13,12 +13,17 @@ import {
     updateProfile,
     doc,
     setDoc,
-    getDoc // <-- Import getDoc here
+    getDoc,
+    setPersistence,
+    browserSessionPersistence,
+    browserLocalPersistence,
+    serverTimestamp,
+    updateDoc
 } from './firebase-init.js';
 
 
 // --- Function to create or verify user document in Firestore ---
-const createUserProfileDocument = async (user, customUsername = null) => {
+const createUserProfileDocument = async (user, Username = null) => {
     const userRef = doc(db, "users", user.uid);
     try {
         const docSnap = await getDoc(userRef);
@@ -32,7 +37,7 @@ const createUserProfileDocument = async (user, customUsername = null) => {
             // Document does not exist, so create it.
             // Prioritize customUsername if provided (from signup),
             // otherwise use user.displayName (e.g., from Google Sign-In), then fallback to email.
-            const usernameToSet = customUsername || user.displayName || user.email.split('@')[0];
+            const usernameToSet = Username || user.displayName || user.email.split('@')[0];
             await setDoc(userRef, {
                 username: usernameToSet,
                 email: user.email,
@@ -66,68 +71,77 @@ const setupAuthProtection = () => {
     const isSignoutPage = pathname.includes('signout.html');
 
     const body = document.body;
-    body.style.visibility = 'hidden';
-    body.style.opacity = '0';
+    const loader = document.getElementById('loading-overlay');
+
+    // If no loader, we might want to hide body to prevent flash, but let's try to rely on loader if present.
+    // If we hide body, we hide loader. So let's NOT hide body if loader exists.
+    if (!loader) {
+        body.style.visibility = 'hidden';
+        body.style.opacity = '0';
+    }
+
+    // --- HEARTBEAT FUNCTION ---
+    const startHeartbeat = (user) => {
+        // Initial update
+        const userRef = doc(db, "users", user.uid);
+        updateDoc(userRef, {
+            lastSeen: serverTimestamp(),
+            isOnline: true
+        }).catch(e => console.warn("Initial heartbeat failed", e));
+
+        // Periodic update every 60 seconds
+        setInterval(() => {
+            updateDoc(userRef, {
+                lastSeen: serverTimestamp(),
+                isOnline: true
+            }).catch(e => console.warn("Heartbeat failed", e));
+        }, 60000);
+    };
+
+    // ... inside onAuthStateChanged ...
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             // --- SCENARIO 1: USER IS LOGGED IN ---
+            // Start Heartbeat
+            startHeartbeat(user);
 
-            // Keep user.reload() here for general robustness.
-            // It helps ensure that for existing users or Google Sign-In,
-            // the user.displayName is current if createUserProfileDocument
-            // needs to use it as a fallback.
             try {
                 await user.reload();
+                // ... rest of logic
+
             } catch (error) {
                 console.warn("Failed to reload user profile:", error);
-                // Continue execution even if reload fails.
             }
 
-            // Now, call the function to create/verify the user's Firestore document.
-            // This call *will not* have customUsername. The modified createUserProfileDocument
-            // will check if the doc exists and, if so, will not overwrite the username.
             await createUserProfileDocument(user);
 
-            // Fetch the username directly from Firestore for display purposes.
-            // This ensures we always get the definitive username from your database.
             const userDocRef = doc(db, "users", user.uid);
             const userDocSnap = await getDoc(userDocRef);
-            let displayUsername = user.email.split('@')[0]; // Default fallback if nothing else is found
+            let displayUsername = user.email.split('@')[0];
 
             if (userDocSnap.exists()) {
                 const userData = userDocSnap.data();
                 if (userData.username) {
                     displayUsername = userData.username;
                 }
-            } else {
-                console.warn("Firestore user document not found for display after creation attempt for UID:", user.uid);
             }
 
             if (isAuthPage || isSignoutPage) {
                 window.location.replace("homepage.html");
             } else {
                 // --- HOMEPAGE UI BLOCK START ---
-
                 const displayNameElem = document.getElementById('user-display-name');
                 const emailElem = document.getElementById('user-email');
                 const photoElem = document.getElementById('user-photo');
                 const logoutButton = document.getElementById('logout-button');
 
-                // Use the fetched displayUsername from Firestore for rendering
-                if (displayNameElem) {
-                    displayNameElem.textContent = displayUsername;
-                }
-
-                if (emailElem) {
-                    emailElem.textContent = user.email;
-                }
-
+                if (displayNameElem) displayNameElem.textContent = displayUsername;
+                if (emailElem) emailElem.textContent = user.email;
                 if (photoElem && user.photoURL) {
                     photoElem.src = user.photoURL;
                     photoElem.style.display = 'block';
                 }
-
                 if (logoutButton) {
                     logoutButton.addEventListener('click', (e) => {
                         e.preventDefault();
@@ -135,22 +149,31 @@ const setupAuthProtection = () => {
                     });
                 }
 
-                body.style.display = 'block';
-                body.style.visibility = 'visible';
-                body.style.opacity = '1';
-
-                // --- HOMEPAGE UI BLOCK END ---
+                // Show Content / Hide Loader
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => { loader.style.visibility = 'hidden'; }, 500);
+                } else {
+                    body.style.display = 'block';
+                    body.style.visibility = 'visible';
+                    body.style.opacity = '1';
+                }
             }
 
         } else {
             // --- SCENARIO 2: USER IS NOT LOGGED IN ---
-
             if (!isAuthPage && !isSignoutPage) {
                 window.location.replace("login.html");
             } else {
-                body.style.display = 'flex';
-                body.style.visibility = 'visible';
-                body.style.opacity = '1';
+                // Show Content / Hide Loader
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => { loader.style.visibility = 'hidden'; }, 500);
+                } else {
+                    body.style.display = 'flex'; // login page uses flex usually
+                    body.style.visibility = 'visible';
+                    body.style.opacity = '1';
+                }
             }
         }
     });
@@ -182,16 +205,49 @@ const displayMessage = (message, isError = true) => {
     }
 }
 
+// --- Helper function to display errors in HTML ---
+const displayInPageError = (elementId, message) => {
+    const errorDiv = document.getElementById(elementId);
+    if (errorDiv) {
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    } else {
+        // Fallback
+        console.error(message);
+        alert(message);
+    }
+}
+
 // --- Login Logic (For login.html) ---
-const handleLogin = (e) => {
+const handleLogin = async (e) => {
     e.preventDefault();
     const email = document.getElementById('login-username').value;
     const password = document.getElementById('login-password').value;
+    const rememberMe = document.getElementById('login-remember').checked;
 
-    signInWithEmailAndPassword(auth, email, password)
-        .catch((error) => {
-            displayMessage(`Login Failed: ${error.message}`, true);
-        });
+    // Reset error display
+    const errorDiv = document.getElementById('login-error');
+    if (errorDiv) errorDiv.style.display = 'none';
+
+    try {
+        if (rememberMe) {
+            await setPersistence(auth, browserLocalPersistence);
+        } else {
+            await setPersistence(auth, browserSessionPersistence);
+        }
+        await signInWithEmailAndPassword(auth, email, password);
+        // Success handled by onAuthStateChanged
+    } catch (error) {
+        let msg = "Login Failed. Check your email and password.";
+        if (error.code === 'auth/invalid-credential') {
+            msg = "Invalid email or password.";
+        } else if (error.code === 'auth/user-not-found') {
+            msg = "User not found.";
+        } else if (error.code === 'auth/wrong-password') {
+            msg = "Incorrect password.";
+        }
+        displayInPageError('login-error', msg);
+    }
 };
 
 
@@ -200,7 +256,22 @@ const handleSignup = async (e) => {
     e.preventDefault();
     const email = document.getElementById('signup-email').value;
     const password = document.getElementById('signup-password').value;
+    const confirmPassword = document.getElementById('signup-confirm-password').value;
     const username = document.getElementById('signup-username').value;
+
+    // Reset error display
+    const errorDiv = document.getElementById('signup-error');
+    if (errorDiv) errorDiv.style.display = 'none';
+
+    if (password !== confirmPassword) {
+        displayInPageError('signup-error', "Passwords do not match.");
+        return;
+    }
+
+    if (password.length < 6) {
+        displayInPageError('signup-error', "Password must be at least 6 characters.");
+        return;
+    }
 
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -232,7 +303,13 @@ const handleSignup = async (e) => {
             window.location.replace("homepage.html");
         } else {
             // User was not created in Auth at all.
-            displayMessage(`Signup Failed: ${error.message}`, true);
+            let msg = error.message;
+            if (error.code === 'auth/email-already-in-use') {
+                msg = "Email is already in use.";
+            } else if (error.code === 'auth/weak-password') {
+                msg = "Password is too weak.";
+            }
+            displayInPageError('signup-error', msg);
         }
     }
 };
