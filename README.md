@@ -8,7 +8,6 @@ It hosts a Web Server which forwards [Sunshine](https://docs.lizardbyte.dev/proj
 ## Key Features
 - **Customizable Touch Controls**: Drag and drop virtual gamepad buttons to suit your hand size and preference. Tap the **✏️ Pencil** icon to edit; your layout is saved automatically.
 - **Low Latency Optimized**: Essential features only; haptic feedback removed to prioritize input speed and frame pacing on mobile devices.
-- **Docker Support**: Deploy easily with a single command.
 - **Split Layout**: Ergonomic controls designed for touchscreens.
 
 ## Overview
@@ -53,22 +52,6 @@ It hosts a Web Server which forwards [Sunshine](https://docs.lizardbyte.dev/proj
 - Features that only work in a [Secure Context](https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts#:~:text=They%20must%20be,be%20considered%20deprecated.) -> [How to configure a Secure Context / https](#configuring-https)
   - Controllers: [Gamepad API](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API)
   - Keyboard Lock (allows to capture almost all keys also OS Keys): [Experimental Keyboard Lock API](https://developer.mozilla.org/en-US/docs/Web/API/Keyboard_API)
-
-## Docker Deployment (Recommended)
-
-
-1.  **Install Docker** on your host machine.
-2.  Navigate to the `docker` directory:
-    ```bash
-    cd docker
-    ```
-3.  Run the container:
-    ```bash
-    docker compose up --build
-    ```
-4.  Access the web interface at `https://localhost:8080`.
-
-For more details, see [docker/README.md](docker/README.md).
 
 
 ## Installation (Manual)
@@ -378,6 +361,7 @@ Will always append the prefix to all requests made by the website.
 ```
 
 ## Contributors
+- Thanks to [@MrCreativ3001](https://github.com/MrCreativ3001) for creating moonlight web.
 - Thanks to [@Argon2000](https://github.com/Argon2000) for implementing a canvas renderer, which makes this run in the Tesla browser.
 
 ## Building
