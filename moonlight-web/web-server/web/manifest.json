@@ -1,6 +1,6 @@
 {
-  "name": "Moonlight Web",
-  "short_name": "Moonlight",
+  "name": "LightJoy Web",
+  "short_name": "LightJoy",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#303030",

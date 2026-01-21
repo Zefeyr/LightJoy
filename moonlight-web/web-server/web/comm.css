@@ -21,14 +21,30 @@ body {
 }
 
 /* Sidebar Styling */
-.hub-sidebar,
+/* Sidebar Styling */
+.hub-sidebar {
+    width: 0;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    border-right: none;
+    transition: width 0.3s ease-in-out;
+}
+
+.hub-sidebar.active {
+    width: 240px;
+    border-right: 1px solid rgba(206, 147, 216, 0.2);
+}
+
 .online-users {
     width: 240px;
     background: rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(10px);
     display: flex;
     flex-direction: column;
-    border-right: 1px solid rgba(206, 147, 216, 0.2);
+    border-left: 1px solid rgba(206, 147, 216, 0.2);
 }
 
 .sidebar-scroller {
@@ -514,4 +530,147 @@ body {
 .channel-list.collapsed,
 .user-list.collapsed {
     display: none !important;
+}
+
+/* --- Mobile Responsiveness --- */
+
+/* Hamburger Button (Always Visible) */
+.hamburger-btn {
+    display: block;
+    background: transparent;
+    border: none;
+    color: #ce93d8;
+    font-size: 1.5rem;
+    cursor: pointer;
+    margin-right: 15px;
+    padding: 5px;
+}
+
+/* Mobile Header Adjustment */
+.chat-header {
+    display: flex;
+    align-items: center;
+}
+
+.header-text {
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 768px) {
+
+    /* Layout Reset */
+    .hub-wrapper {
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    /* Left Sidebar: Off-screen Overlay */
+    .hub-sidebar {
+        /* Mobile Specific: Overlay */
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 280px !important;
+        /* Touch width */
+        z-index: 1000;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
+        background: #1a1f3ae6;
+
+        /* Reset shared styles */
+        width: 280px;
+    }
+
+    .hub-sidebar.active {
+        /* Mobile: Transform in */
+        width: 280px;
+        transform: translateX(0);
+    }
+
+    /* Right Sidebar: Off-screen Overlay (Right Side) */
+    .online-users {
+        display: flex;
+        /* Show it (was none) */
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 100%;
+        width: 280px !important;
+        z-index: 1000;
+        transform: translateX(100%);
+        /* Off-screen right */
+        transition: transform 0.3s ease-in-out;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
+        background: #1a1f3ae6;
+        border-left: none;
+    }
+
+    .online-users.active {
+        transform: translateX(0);
+    }
+
+    /* Main Chat: Full Width */
+    .chat-main {
+        width: 100%;
+    }
+
+    /* Show Hamburger */
+    .hamburger-btn {
+        display: block;
+    }
+
+    /* Modal Adjustments */
+    .modal {
+        width: 90%;
+        margin: 0 5%;
+    }
+
+    .chat-input-container {
+        padding: 10px;
+        padding-bottom: 30px;
+    }
+}
+
+/* Footer pinned to bottom */
+.sidebar-footer {
+    margin-top: auto;
+    flex-shrink: 0;
+    /* Prevent crushing */
+    padding: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Top Back Nav */
+.nav-back-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    font-weight: bold;
+    color: #ce93d8;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    font-size: 0.95rem;
+}
+
+.nav-back-header:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+/* --- CRITICAL MOBILE FIXES --- */
+/* Force dynamic viewport height to handle mobile address bars */
+body,
+.hub-wrapper {
+    height: 100dvh !important;
+}
+
+/* Ensure input box is visible above mobile UI */
+@media (max-width: 768px) {
+    .chat-input-container {
+        padding-bottom: 0px !important;
+    }
 }

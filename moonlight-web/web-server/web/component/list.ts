@@ -177,4 +177,7 @@ export class ListComponent<T extends Component> implements Component {
             }
         }
     }
+    public getListElement(): HTMLElement {
+        return this.listElement
+    }
 }

@@ -1,3 +1,4 @@
+
 import { Component } from "./index.js";
 import { StreamInput } from "../stream/input.js";
 import { GamepadState } from "../stream/gamepad.js";
@@ -18,11 +19,13 @@ export class VirtualGamepad implements Component {
     private leftTrigger = 0;
     private rightTrigger = 0;
 
-
-
     private isEditMode = false;
-    private layoutStorageKey = "moonlight-virtual-layout";
+    private layoutStorageKey = "lightjoy-virtual-layout";
     private managers: any[] = [];
+    private defaultLayout: any = {
+        "stick-left": { left: "150px", bottom: "40px" },
+        "stick-right": { right: "150px", bottom: "40px" },
+    };
 
     constructor(streamInput: StreamInput) {
         this.streamInput = streamInput;
@@ -36,6 +39,8 @@ export class VirtualGamepad implements Component {
         this.container.style.pointerEvents = "none"; // Let clicks pass through empty areas
         this.container.style.zIndex = "1000";
         this.container.style.display = "none"; // Hidden by default until enabled
+
+
     }
 
     mount(parent: HTMLElement) {
@@ -58,8 +63,6 @@ export class VirtualGamepad implements Component {
     public disable() {
         this.container.style.display = "none";
     }
-
-
 
     private updateState() {
         if (this.virtualId === -1) return;
@@ -86,6 +89,12 @@ export class VirtualGamepad implements Component {
                 element.style.left = style.left || "";
                 element.style.right = style.right || "";
                 element.style.transform = style.transform || "";
+            } else if (this.defaultLayout[id]) {
+                // Load default if no save
+                const style = this.defaultLayout[id];
+                element.style.left = style.left || "";
+                element.style.bottom = style.bottom || "";
+                element.style.right = style.right || "";
             }
         } catch (e) {
             console.error("Failed to load layout", e);
@@ -95,6 +104,7 @@ export class VirtualGamepad implements Component {
     private saveLayout(id: string, element: HTMLElement) {
         try {
             const layout = JSON.parse(localStorage.getItem(this.layoutStorageKey) || "{}");
+            // Save computed styles or current style
             layout[id] = {
                 top: element.style.top,
                 bottom: element.style.bottom,
@@ -116,18 +126,12 @@ export class VirtualGamepad implements Component {
         const onTouchStart = (e: TouchEvent) => {
             if (!this.isEditMode) return;
             e.preventDefault();
-            e.stopPropagation(); // Stop button press
             isDragging = true;
             const touch = e.touches[0];
             startX = touch.clientX;
             startY = touch.clientY;
 
             const rect = element.getBoundingClientRect();
-            // We need to work with computed styles effectively, but for simplicity
-            // we will switch to absolute top/left positioning upon drag start if not already
-            // forcing a reset of bottom/right to auto might be needed
-
-            // Simplified drag: just update left/top based on delta
             const parentRect = this.container.getBoundingClientRect();
             startLeft = rect.left - parentRect.left;
             startTop = rect.top - parentRect.top;
@@ -136,7 +140,7 @@ export class VirtualGamepad implements Component {
             element.style.bottom = "auto";
             element.style.left = `${startLeft}px`;
             element.style.top = `${startTop}px`;
-            element.style.transform = "none"; // Clear transform during drag to simplify
+            element.style.transform = "none";
         };
 
         const onTouchMove = (e: TouchEvent) => {
@@ -172,14 +176,12 @@ export class VirtualGamepad implements Component {
             align-items: center; justify-content: center; pointer-events: auto; cursor: pointer;
         `;
         editBtn.onclick = () => {
-            console.log("Edit Mode Toggled via Click");
             this.isEditMode = !this.isEditMode;
             editBtn.style.background = this.isEditMode ? "rgba(255, 0, 0, 0.8)" : "rgba(0,0,0,0.5)";
             this.container.style.border = this.isEditMode ? "4px solid red" : "none";
         };
-        // Add explicit touch handler for better mobile responsiveness
         editBtn.ontouchend = (e) => {
-            e.preventDefault(); // Prevent ghost click
+            e.preventDefault();
             editBtn.onclick?.(e as any);
         };
         this.container.appendChild(editBtn);
@@ -197,7 +199,6 @@ export class VirtualGamepad implements Component {
             font-weight: bold;
             user-select: none;
             pointer-events: auto;
-            touch-action: none;
             opacity: 0.5;
         `;
 
@@ -206,37 +207,28 @@ export class VirtualGamepad implements Component {
         const dpadBaseLeft = 70;
         const dpadBaseBottom = 90;
 
-        // Up
         this.createButton("btn-up", "↑", StreamControllerButton.BUTTON_UP, `${commonButtonStyle} width: ${dpadSize}px; height: ${dpadSize}px; bottom: ${dpadBaseBottom + 55}px; left: ${dpadBaseLeft}px; border-radius: 10px;`);
-        // Down
         this.createButton("btn-down", "↓", StreamControllerButton.BUTTON_DOWN, `${commonButtonStyle} width: ${dpadSize}px; height: ${dpadSize}px; bottom: ${dpadBaseBottom - 55}px; left: ${dpadBaseLeft}px; border-radius: 10px;`);
-        // Left
         this.createButton("btn-left", "←", StreamControllerButton.BUTTON_LEFT, `${commonButtonStyle} width: ${dpadSize}px; height: ${dpadSize}px; bottom: ${dpadBaseBottom}px; left: ${dpadBaseLeft - 55}px; border-radius: 10px;`);
-        // Right
         this.createButton("btn-right", "→", StreamControllerButton.BUTTON_RIGHT, `${commonButtonStyle} width: ${dpadSize}px; height: ${dpadSize}px; bottom: ${dpadBaseBottom}px; left: ${dpadBaseLeft + 55}px; border-radius: 10px;`);
 
-
-        // --- Left Joystick (Center Left) ---
-        // Positioned right of the D-Pad
+        // --- Left Joystick (Static) ---
         const leftZone = document.createElement("div");
         leftZone.id = "vgamepad-left-zone";
-        // left: dpadBaseLeft (70) + offset (~120) = 190
-        leftZone.style.cssText = "position: absolute; bottom: 40px; left: 190px; width: 120px; height: 120px; pointer-events: auto;";
+        leftZone.style.cssText = "position: absolute; width: 150px; height: 150px; pointer-events: auto; z-index: 1001;"; // Slightly higher Z than buttons
         this.loadLayout("stick-left", leftZone);
         this.enableDrag(leftZone, "stick-left");
         this.container.appendChild(leftZone);
 
-        // --- Right Joystick (Center Right) ---
-        // Positioned left of the ABXY
+        // --- Right Joystick (Static) ---
         const rightZone = document.createElement("div");
         rightZone.id = "vgamepad-right-zone";
-        // right: abxyBaseRight (70) + offset (~120) = 190
-        rightZone.style.cssText = "position: absolute; bottom: 40px; right: 190px; width: 120px; height: 120px; pointer-events: auto;";
+        rightZone.style.cssText = "position: absolute; width: 150px; height: 150px; pointer-events: auto; z-index: 1001;";
         this.loadLayout("stick-right", rightZone);
         this.enableDrag(rightZone, "stick-right");
         this.container.appendChild(rightZone);
 
-        // Init Nipple.js with smaller size (80)
+        // Init Nipple.js
         const leftManager = nipplejs.create({
             zone: leftZone,
             mode: 'static',
@@ -244,23 +236,29 @@ export class VirtualGamepad implements Component {
             color: 'white',
             size: 80
         });
-        (leftManager as any).get(leftManager.ids[0]).ui.el.style.opacity = "0.5";
+
+        // Opacity styling safety
+        const leftNipple = (leftManager as any).get(leftManager.ids[0]);
+        if (leftNipple) leftNipple.ui.el.style.opacity = "0.5";
 
         leftManager.on('move', (evt: any, data: any) => {
             if (data && data.vector) {
+                // Standard Vector Mapping
                 this.leftStick.x = data.vector.x;
-                this.leftStick.y = -data.vector.y;
+                this.leftStick.y = -data.vector.y; // Invert Y as usual
                 this.updateState();
             }
         });
         leftManager.on('start', () => {
-            (leftManager as any).get(leftManager.ids[0]).ui.el.style.opacity = "0.9";
+            const n = (leftManager as any).get(leftManager.ids[0]);
+            if (n) n.ui.el.style.opacity = "0.9";
         });
         leftManager.on('end', () => {
             this.leftStick.x = 0;
             this.leftStick.y = 0;
             this.updateState();
-            (leftManager as any).get(leftManager.ids[0]).ui.el.style.opacity = "0.5";
+            const n = (leftManager as any).get(leftManager.ids[0]);
+            if (n) n.ui.el.style.opacity = "0.5";
         });
 
         const rightManager = nipplejs.create({
@@ -270,7 +268,9 @@ export class VirtualGamepad implements Component {
             color: 'white',
             size: 80
         });
-        (rightManager as any).get(rightManager.ids[0]).ui.el.style.opacity = "0.5";
+
+        const rightNipple = (rightManager as any).get(rightManager.ids[0]);
+        if (rightNipple) rightNipple.ui.el.style.opacity = "0.5";
 
         rightManager.on('move', (evt: any, data: any) => {
             if (data && data.vector) {
@@ -280,29 +280,27 @@ export class VirtualGamepad implements Component {
             }
         });
         rightManager.on('start', () => {
-            (rightManager as any).get(rightManager.ids[0]).ui.el.style.opacity = "0.9";
+            const n = (rightManager as any).get(rightManager.ids[0]);
+            if (n) n.ui.el.style.opacity = "0.9";
         });
         rightManager.on('end', () => {
             this.rightStick.x = 0;
             this.rightStick.y = 0;
             this.updateState();
-            (rightManager as any).get(rightManager.ids[0]).ui.el.style.opacity = "0.5";
+            const n = (rightManager as any).get(rightManager.ids[0]);
+            if (n) n.ui.el.style.opacity = "0.5";
         });
 
         this.managers.push(leftManager, rightManager);
 
-        // --- Action Buttons (ABXY) (Far Right) ---
+        // --- Action Buttons ---
         const btnSize = 55;
         const btnBaseRight = 70;
         const btnBaseBottom = 90;
 
-        // A (Bottom)
         this.createButton("btn-a", "A", StreamControllerButton.BUTTON_A, `${commonButtonStyle} width: ${btnSize}px; height: ${btnSize}px; bottom: ${btnBaseBottom - 55}px; right: ${btnBaseRight}px; background: rgba(0, 255, 0, 0.15); border-color: rgba(0, 255, 0, 0.4);`);
-        // B (Right)
         this.createButton("btn-b", "B", StreamControllerButton.BUTTON_B, `${commonButtonStyle} width: ${btnSize}px; height: ${btnSize}px; bottom: ${btnBaseBottom}px; right: ${btnBaseRight - 55}px; background: rgba(255, 0, 0, 0.15); border-color: rgba(255, 0, 0, 0.4);`);
-        // X (Left)
         this.createButton("btn-x", "X", StreamControllerButton.BUTTON_X, `${commonButtonStyle} width: ${btnSize}px; height: ${btnSize}px; bottom: ${btnBaseBottom}px; right: ${btnBaseRight + 55}px; background: rgba(0, 0, 255, 0.15); border-color: rgba(0, 0, 255, 0.4);`);
-        // Y (Top)
         this.createButton("btn-y", "Y", StreamControllerButton.BUTTON_Y, `${commonButtonStyle} width: ${btnSize}px; height: ${btnSize}px; bottom: ${btnBaseBottom + 55}px; right: ${btnBaseRight}px; background: rgba(255, 255, 0, 0.15); border-color: rgba(255, 255, 0, 0.4);`);
 
         // --- Center Buttons ---
@@ -310,11 +308,9 @@ export class VirtualGamepad implements Component {
         this.createButton("btn-start", "START", StreamControllerButton.BUTTON_PLAY, `${commonButtonStyle} width: 60px; height: 30px; border-radius: 15px; bottom: 20px; left: 50%; transform: translateX(20%); font-size: 10px;`);
 
         // --- Shoulder Buttons ---
-        // L1/R1 (Bumpers) - Positioned above D-Pad and ABXY
         this.createButton("btn-l1", "L1", StreamControllerButton.BUTTON_LB, `${commonButtonStyle} width: 100px; height: 40px; border-radius: 10px; top: 80px; left: 40px;`);
         this.createButton("btn-r1", "R1", StreamControllerButton.BUTTON_RB, `${commonButtonStyle} width: 100px; height: 40px; border-radius: 10px; top: 80px; right: 40px;`);
 
-        // L2/R2 (Triggers) - Above L1/R1
         this.createTrigger("btn-l2", "L2", true, `${commonButtonStyle} width: 100px; height: 40px; border-radius: 10px; top: 30px; left: 40px;`);
         this.createTrigger("btn-r2", "R2", false, `${commonButtonStyle} width: 100px; height: 40px; border-radius: 10px; top: 30px; right: 40px;`);
     }
@@ -325,6 +321,7 @@ export class VirtualGamepad implements Component {
         btn.style.cssText = cssText;
 
         this.loadLayout(id, btn);
+        this.enableDrag(btn, id);
 
         const press = (e: TouchEvent | MouseEvent) => {
             if (this.isEditMode) return;
@@ -342,7 +339,7 @@ export class VirtualGamepad implements Component {
         btn.onmousedown = press;
         btn.onmouseup = release;
         btn.ontouchstart = (e) => {
-            if (this.isEditMode) return; // Let dragging handler take over
+            if (this.isEditMode) return;
             e.preventDefault();
             press(e);
         };
@@ -351,8 +348,6 @@ export class VirtualGamepad implements Component {
             e.preventDefault();
             release(e);
         };
-
-        this.enableDrag(btn, id);
         this.container.appendChild(btn);
     }
 
@@ -362,16 +357,19 @@ export class VirtualGamepad implements Component {
         btn.style.cssText = cssText;
 
         this.loadLayout(id, btn);
+        this.enableDrag(btn, id);
 
         const press = (e: TouchEvent | MouseEvent) => {
             if (this.isEditMode) return;
-            if (isLeft) this.leftTrigger = 255; else this.rightTrigger = 255;
+            if (isLeft) this.leftTrigger = 32767;
+            else this.rightTrigger = 32767;
             btn.style.opacity = "0.9";
             this.updateState();
         };
         const release = (e: TouchEvent | MouseEvent) => {
             if (this.isEditMode) return;
-            if (isLeft) this.leftTrigger = 0; else this.rightTrigger = 0;
+            if (isLeft) this.leftTrigger = 0;
+            else this.rightTrigger = 0;
             btn.style.opacity = "0.5";
             this.updateState();
         };
@@ -388,9 +386,6 @@ export class VirtualGamepad implements Component {
             e.preventDefault();
             release(e);
         };
-
-        this.enableDrag(btn, id);
-
         this.container.appendChild(btn);
     }
 }

@@ -45,7 +45,7 @@ class MainApp implements Component {
 
     private divElement = document.createElement("div")
 
-    private moonlightTextElement = document.createElement("h1")
+    private appTitleElement = document.createElement("h1")
     private actionElement = document.createElement("div")
 
     private backToHostsButton: HTMLButtonElement = document.createElement("button")
@@ -53,6 +53,9 @@ class MainApp implements Component {
 
     private hostAddButton: HTMLButtonElement = document.createElement("button")
     private settingsButton: HTMLButtonElement = document.createElement("button")
+
+    private actionTitle = document.createElement("span")
+    private rightActions = document.createElement("div")
 
     private currentDisplay: DisplayStates | null = null
 
@@ -63,9 +66,9 @@ class MainApp implements Component {
     constructor(api: Api) {
         this.api = api
 
-        // Moonlight text
-        this.moonlightTextElement.innerHTML = "LightJoy"
-        this.moonlightTextElement.classList.add("app-title")
+        // App Title text
+        this.appTitleElement.innerHTML = "LightJoy"
+        this.appTitleElement.classList.add("app-title")
 
         // Actions
         this.actionElement.classList.add("actions-list")
@@ -78,6 +81,15 @@ class MainApp implements Component {
         this.homeButton.innerText = "Home"
         this.homeButton.href = "homepage.html"
         this.homeButton.classList.add("btn-home") // Add class for styling
+
+        // Action Bar Title
+        this.actionTitle.innerText = "Select Host"
+        this.actionTitle.className = "action-bar-title"
+
+        // Right Actions Container
+        this.rightActions.className = "right-actions"
+        this.rightActions.appendChild(this.hostAddButton)
+        this.rightActions.appendChild(this.settingsButton)
 
         // Host add button
         this.hostAddButton.classList.add("host-add")
@@ -96,7 +108,7 @@ class MainApp implements Component {
         this.settings.addChangeListener(this.onSettingsChange.bind(this))
 
         // Append default elements
-        this.divElement.appendChild(this.moonlightTextElement)
+        this.divElement.appendChild(this.appTitleElement)
         this.divElement.appendChild(this.actionElement)
 
         this.setCurrentDisplay("hosts")
@@ -188,8 +200,8 @@ class MainApp implements Component {
         // Unmount the current display
         if (this.currentDisplay == "hosts") {
             this.actionElement.removeChild(this.homeButton) // Remove Home button
-            this.actionElement.removeChild(this.hostAddButton)
-            this.actionElement.removeChild(this.settingsButton)
+            this.actionElement.removeChild(this.actionTitle) // Remove Title
+            this.actionElement.removeChild(this.rightActions) // Remove Right Actions Container
 
             this.hostList.unmount(this.divElement)
         } else if (this.currentDisplay == "games") {
@@ -204,9 +216,10 @@ class MainApp implements Component {
 
         // Mount the new display
         if (display == "hosts") {
+            // Order: Home (Left) -> Title (Center) -> Add/Settings (Right Container)
             this.actionElement.appendChild(this.homeButton) // Add Home Button
-            this.actionElement.appendChild(this.hostAddButton)
-            this.actionElement.appendChild(this.settingsButton)
+            this.actionElement.appendChild(this.actionTitle) // Add Title
+            this.actionElement.appendChild(this.rightActions) // Add Right Actions
 
             this.hostList.mount(this.divElement)
 

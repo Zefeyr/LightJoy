@@ -6,7 +6,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LightJoy - Cloud Gaming Platform</title>
-    <link rel="icon" href="resources/moonlight.svg" sizes="any" type="image/svg+xml">
+    <link rel="icon" href="resources/lightjoy_icon.svg" sizes="any" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="home.css" />
 </head>
@@ -15,24 +15,36 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="navbar-container">
-            <div class="logo">
+            <a href="#home" class="logo">
                 <span class="logo-text">LightJoy</span>
+            </a>
+
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <line class="line-top" x1="2" y1="8" x2="22" y2="8" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" />
+                    <line class="line-bottom" x1="2" y1="16" x2="22" y2="16" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" />
+                </svg>
+            </button>
+
+            <div class="nav-overlay" id="navOverlay">
+                <ul class="nav-links">
+                    <li><a href="#home" class="nav-link">Home</a></li>
+                    <li><a href="#about" class="nav-link">About</a></li>
+                    <li><a href="#features" class="nav-link">Features</a></li>
+                    <li><a href="login.html" class="join-btn-mobile">Join Now</a></li>
+                </ul>
             </div>
-            <ul class="nav-links">
-                <li><a href="#home" class="nav-link">Home</a></li>
-                <li><a href="#about" class="nav-link">About</a></li>
-                <li><a href="#features" class="nav-link">Features</a></li>
-                <li><a href="login.html" class="join-btn-nav">Join Now</a></li>
-            </ul>
         </div>
     </nav>
 
     <!-- Hero Section -->
     <section id="home" class="hero">
         <div class="hero-content">
-            <h1 class="hero-title">Welcome to LightJoy</h1>
-            <p class="hero-subtitle">Stream your favorite games anywhere, anytime with zero latency</p>
-            <a href="login.html" class="cta-button">Get Started Now</a>
+            <h1 class="hero-title reveal">Welcome to LightJoy</h1>
+            <p class="hero-subtitle reveal stagger-1">Stream your favorite games anywhere, anytime with zero latency</p>
+            <a href="login.html" class="cta-button reveal stagger-2">Get Started Now</a>
         </div>
         <div class="hero-background">
             <div class="gradient-circle circle-1"></div>
@@ -43,37 +55,37 @@
     <!-- Features Section -->
     <section id="features" class="features">
         <div class="features-container">
-            <h2 class="section-title">Why Choose LightJoy?</h2>
+            <h2 class="section-title reveal">Why Choose LightJoy?</h2>
             <div class="features-grid">
-                <div class="feature-card">
+                <div class="feature-card reveal">
                     <div class="feature-icon">🎮</div>
-                    <h3>Ultra Low Latency</h3>
-                    <p>Experience gaming with minimal delay, perfect for competitive play</p>
+                    <h3>Low Latency</h3>
+                    <p>Experience gaming with minimal delay, perfect for co-op play</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card reveal stagger-1">
                     <div class="feature-icon">⚡</div>
                     <h3>Blazing Fast</h3>
                     <p>Stream high-quality games at optimal performance on any device</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card reveal stagger-2">
                     <div class="feature-icon">🔒</div>
                     <h3>Secure & Private</h3>
                     <p>Your gaming sessions are encrypted and completely private</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card reveal">
                     <div class="feature-icon">📱</div>
                     <h3>Cross Platform</h3>
                     <p>Play on any device - PC, tablet, or smartphone</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card reveal stagger-1">
                     <div class="feature-icon">🌍</div>
                     <h3>Community Hub</h3>
                     <p>Reach other players and build your gaming community</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card reveal stagger-2">
                     <div class="feature-icon">💪</div>
                     <h3>Powerful Performance</h3>
-                    <p>Stream games in 4K with high refresh rates</p>
+                    <p>Stream games with high refresh rates</p>
                 </div>
             </div>
         </div>
@@ -83,27 +95,28 @@
     <section id="about" class="about">
         <div class="about-container">
             <div class="about-content">
-                <h2 class="section-title">About LightJoy</h2>
-                <p class="about-text">
-                    LightJoy is a cutting-edge cloud gaming platform that brings console-quality gaming to your fingertips. 
-                    Built on advanced streaming technology, we deliver an unparalleled gaming experience with minimal latency 
+                <h2 class="section-title reveal">About LightJoy</h2>
+                <p class="about-text reveal stagger-1">
+                    LightJoy is a cutting-edge cloud gaming platform that brings console-quality gaming to your
+                    fingertips.
+                    Built on advanced streaming technology, we deliver an unparalleled gaming experience with minimal
+                    latency
                     and maximum performance.
                 </p>
-                <p class="about-text">
-                    Whether you're a casual gamer or a hardcore enthusiast, LightJoy provides the infrastructure and tools 
-                    to play your favorite games anywhere, on any device. Our mission is to democratize gaming by removing 
+                <p class="about-text reveal stagger-1">
+                    Whether you're a casual gamer or a hardcore enthusiast, LightJoy provides the infrastructure and
+                    tools
+                    to play your favorite games anywhere, on any device. Our mission is to democratize gaming by
+                    removing
                     hardware barriers and letting you focus on what matters most - enjoying great games.
                 </p>
                 <div class="about-stats">
-                    <div class="stat">
-                        <h4>100+</h4>
-                        <p>Games Available</p>
-                    </div>
-                    <div class="stat">
+
+                    <div class="stat reveal stagger-1">
                         <h4>50ms</h4>
                         <p>Average Latency</p>
                     </div>
-                    <div class="stat">
+                    <div class="stat reveal stagger-2">
                         <h4>24/7</h4>
                         <p>Support</p>
                     </div>
@@ -119,7 +132,7 @@
 
     <!-- Call to Action Section -->
     <section class="cta-section">
-        <div class="cta-content">
+        <div class="cta-content reveal">
             <h2>Ready to Experience Cloud Gaming?</h2>
             <p>Join thousands of gamers enjoying LightJoy today</p>
             <a href="login.html" class="cta-button-large">Join Now</a>
@@ -141,6 +154,32 @@
     </footer>
 
     <script>
+        // Apple-style menu toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const navbar = document.querySelector('.navbar');
+
+        menuToggle.addEventListener('click', () => {
+            // Toggle the 'active' class on the navbar container
+            navbar.classList.toggle('active');
+            menuToggle.classList.toggle('active');
+
+            // Prevent body scroll when menu is open
+            if (navbar.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // Close menu when a link is clicked
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                navbar.classList.remove('active');
+                menuToggle.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            });
+        });
+
         // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -151,8 +190,28 @@
                 }
             });
         });
+
+        // Scroll Reveal Animation
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target); // Only animate once
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => {
+            observer.observe(el);
+        });
     </script>
-    
+
 </body>
 
 </html>

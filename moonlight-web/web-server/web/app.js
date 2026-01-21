@@ -183,6 +183,7 @@ const setupAuthProtection = () => {
 // --- 3. GOOGLE SIGN-IN HANDLER ---
 const handleGoogleLogin = async () => {
     try {
+        await setPersistence(auth, browserLocalPersistence);
         const result = await signInWithPopup(auth, googleProvider);
         console.log("Google Sign-In Success:", result.user.email);
         // The onAuthStateChanged listener will now handle creating the user profile if it doesn't exist
@@ -194,14 +195,50 @@ const handleGoogleLogin = async () => {
 };
 
 
-// --- Helper function to display messages ---
+
+// --- Helper function to create Toast ---
+const showToast = (message, type = 'error') => {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<span>${message}</span>`;
+
+    // Add close button
+    const closeBtn = document.createElement('span');
+    closeBtn.innerHTML = '&times;';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.style.marginLeft = '10px';
+    closeBtn.onclick = () => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 300);
+    };
+    toast.appendChild(closeBtn);
+
+    container.appendChild(toast);
+
+    // Auto remove
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.classList.add('fade-out');
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 4000); // 4 seconds
+};
+
+// --- Helper function to display messages (Using Toast) ---
 const displayMessage = (message, isError = true) => {
     if (isError) {
         console.error(message);
-        alert(`Error: ${message}`);
+        showToast(message, 'error');
     } else {
         console.log(message);
-        alert(`Success: ${message}`);
+        showToast(message, 'success');
     }
 }
 
@@ -212,15 +249,19 @@ const displayInPageError = (elementId, message) => {
         errorDiv.textContent = message;
         errorDiv.style.display = 'block';
     } else {
-        // Fallback
-        console.error(message);
-        alert(message);
+        // Fallback for missing elements
+        showToast(message, 'error');
     }
 }
 
 // --- Login Logic (For login.html) ---
 const handleLogin = async (e) => {
     e.preventDefault();
+
+    // UI Loading State
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.classList.add('loading-btn');
+
     const email = document.getElementById('login-username').value;
     const password = document.getElementById('login-password').value;
     const rememberMe = document.getElementById('login-remember').checked;
@@ -230,14 +271,15 @@ const handleLogin = async (e) => {
     if (errorDiv) errorDiv.style.display = 'none';
 
     try {
-        if (rememberMe) {
-            await setPersistence(auth, browserLocalPersistence);
-        } else {
-            await setPersistence(auth, browserSessionPersistence);
-        }
+        // Enforce Local Persistence (Remember Me) by default for better UX
+        // The "Remember Me" checkbox could be repurposed or removed, but for now we ignore it to fix the issue.
+        await setPersistence(auth, browserLocalPersistence);
+
         await signInWithEmailAndPassword(auth, email, password);
         // Success handled by onAuthStateChanged
     } catch (error) {
+        if (submitBtn) submitBtn.classList.remove('loading-btn'); // Reset button
+
         let msg = "Login Failed. Check your email and password.";
         if (error.code === 'auth/invalid-credential') {
             msg = "Invalid email or password.";
@@ -247,6 +289,7 @@ const handleLogin = async (e) => {
             msg = "Incorrect password.";
         }
         displayInPageError('login-error', msg);
+        showToast(msg, 'error'); // Also show toast for visibility
     }
 };
 
@@ -254,6 +297,11 @@ const handleLogin = async (e) => {
 // --- Updated Sign Up Logic (NO Firestore write here anymore) ---
 const handleSignup = async (e) => {
     e.preventDefault();
+
+    // UI Loading State
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.classList.add('loading-btn');
+
     const email = document.getElementById('signup-email').value;
     const password = document.getElementById('signup-password').value;
     const confirmPassword = document.getElementById('signup-confirm-password').value;
@@ -265,11 +313,13 @@ const handleSignup = async (e) => {
 
     if (password !== confirmPassword) {
         displayInPageError('signup-error', "Passwords do not match.");
+        if (submitBtn) submitBtn.classList.remove('loading-btn');
         return;
     }
 
     if (password.length < 6) {
         displayInPageError('signup-error', "Password must be at least 6 characters.");
+        if (submitBtn) submitBtn.classList.remove('loading-btn');
         return;
     }
 
@@ -286,6 +336,8 @@ const handleSignup = async (e) => {
 
         window.location.replace("homepage.html");
     } catch (error) {
+        if (submitBtn) submitBtn.classList.remove('loading-btn'); // Reset button
+
         // If an error occurs but the user *was* created in Auth (e.g., network issue after Auth but before Firestore write)
         if (auth.currentUser) {
             console.warn("Signup error, but user created in Auth. Attempting to finalize profile:", error);
@@ -310,6 +362,7 @@ const handleSignup = async (e) => {
                 msg = "Password is too weak.";
             }
             displayInPageError('signup-error', msg);
+            showToast(msg, 'error');
         }
     }
 };

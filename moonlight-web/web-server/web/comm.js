@@ -17,6 +17,8 @@ import {
     setDoc,
     deleteDoc,
     getDoc,
+    startAfter,
+    limit,
     arrayUnion
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
@@ -24,12 +26,14 @@ import {
 let currentChatId = "global"; // 'global' or 'dm_uidA_uidB'
 let currentChatType = "global"; // 'global' or 'dm'
 let currentChatUnsubscribe = null;
-let currentFriendRequestDocId = null; // For updating "read" status in DM
-let currentChatFriendUid = null;      // For updating "unread" status when sending
+let currentFriendRequestDocId = null; // Legacy state, prefer friendDocMap lookup
+let currentChatFriendUid = null;      // Legacy state
+let friendDocMap = new Map();         // Map<FriendUID, FriendRequestDocID>
 
 let oldestDoc = null;
 let isLoadingMore = false;
 let hasMoreMessages = true;
+let isLoadingOlder = false;
 
 // --- DOM ELEMENTS ---
 const messageContainer = document.getElementById('chat-messages');
@@ -94,6 +98,53 @@ setupCollapsible('header-dms', 'dm-list');
 
 // --- GLOBAL USER CACHE ---
 const userCache = new Map();
+
+// --- MOBILE MENU ---
+function setupMobileMenu() {
+    const menuBtn = document.getElementById('menu-btn');
+    const usersBtn = document.getElementById('users-btn');
+    const leftSidebar = document.querySelector('.hub-sidebar');
+    const rightSidebar = document.querySelector('.online-users');
+
+    // Left Sidebar Toggle
+    if (menuBtn && leftSidebar) {
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            leftSidebar.classList.toggle('active');
+            if (rightSidebar) rightSidebar.classList.remove('active');
+        });
+    }
+
+    // Right Sidebar Toggle
+    if (usersBtn && rightSidebar) {
+        usersBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            rightSidebar.classList.toggle('active');
+            if (leftSidebar) leftSidebar.classList.remove('active');
+        });
+    }
+
+    // Close on Outside Click
+    document.addEventListener('click', (e) => {
+        // Desktop check: Do not close on larger screens
+        if (window.innerWidth > 768) return;
+
+        // If Left Sidebar is Open
+        if (leftSidebar && leftSidebar.classList.contains('active')) {
+            if (!leftSidebar.contains(e.target) && e.target !== menuBtn) {
+                leftSidebar.classList.remove('active');
+            }
+        }
+        // If Right Sidebar is Open
+        if (rightSidebar && rightSidebar.classList.contains('active')) {
+            if (!rightSidebar.contains(e.target) && e.target !== usersBtn) {
+                rightSidebar.classList.remove('active');
+            }
+        }
+    });
+}
+setupMobileMenu();
+
 async function getLatestUsername(uid, fallback) {
     if (!uid) return fallback;
     if (userCache.has(uid)) return userCache.get(uid);
@@ -134,13 +185,20 @@ function subscribeToChat(chatId, targetName = "Global Chat") {
     // 2. Reset State
     currentChatId = chatId;
     if (chatId === "global") currentChatType = "global";
+
     else if (chatId.startsWith('group_')) currentChatType = "group";
     else currentChatType = "dm";
+
+    // Auto-close Sidebar on Mobile
+    if (window.innerWidth <= 768) {
+        document.querySelector('.hub-sidebar').classList.remove('active');
+    }
 
     // --- UI Resets ---
     messageContainer.innerHTML = '';
     oldestDoc = null;
     hasMoreMessages = true;
+    isLoadingOlder = false;
 
     // 3. Update UI
     let displayTitle = targetName;
@@ -202,6 +260,59 @@ function subscribeToChat(chatId, targetName = "Global Chat") {
     });
 }
 
+
+
+
+async function loadOlderMessages() {
+    if (isLoadingOlder || !hasMoreMessages || !oldestDoc) return;
+    isLoadingOlder = true;
+
+    const currentHeight = messageContainer.scrollHeight;
+    const currentTop = messageContainer.scrollTop; // usually 0
+
+    // Show loading indicator? (Optional, maybe specific UI element)
+
+    try {
+        let msgCol;
+        if (currentChatType === "global") msgCol = collection(db, "messages");
+        else if (currentChatType === "group") msgCol = collection(db, "groups", currentChatId.replace('group_', ''), "messages");
+        else msgCol = collection(db, "direct_messages", currentChatId, "messages");
+
+        // Query backwards from the oldest doc we have
+        const q = query(msgCol, orderBy("createdAt", "desc"), startAfter(oldestDoc), limit(20));
+        const snap = await getDocs(q);
+
+        if (snap.empty) {
+            hasMoreMessages = false;
+        } else {
+            oldestDoc = snap.docs[snap.docs.length - 1]; // Move anchor to the new oldest
+
+            // They come in DESC order (Newest -> Oldest). 
+            // We want to prepend them such that they appear chronologically above.
+            // But renderMessage(..., prepend=true) puts it at the VERY TOP.
+            // So if we iterate the list:
+            // 1. Msg A (Newer) -> Prepend -> [A]
+            // 2. Msg B (Older) -> Prepend -> [B, A]
+            // Result: B, A ... (Correct order)
+
+            snap.forEach(docSnap => {
+                renderMessage(docSnap.data(), true);
+            });
+
+            // Restore Scroll Position
+            // New height - Old height = amount added.
+            // We want to stay at the same relative visual position.
+            // scrollTop should be set to (newHeight - oldHeight).
+            messageContainer.scrollTop = messageContainer.scrollHeight - currentHeight;
+        }
+
+    } catch (e) {
+        console.error("Error loading older messages:", e);
+    }
+
+    isLoadingOlder = false;
+}
+
 // Global Chat Click Handler
 // We need to find the element again since we might have lost reference
 document.querySelector('.channel').onclick = () => subscribeToChat("global");
@@ -242,16 +353,43 @@ chatForm.addEventListener('submit', async (e) => {
             }).catch(e => console.error("Update group time failed", e));
         }
 
-        // NOTIFICATION LOGIC: If DM, update the friend request doc to show "unread" for the OTHER person
-        if (currentChatType === 'dm' && currentFriendRequestDocId && currentChatFriendUid) {
-            // Write to the document that links us
-            const reqRef = doc(db, "friend_requests", currentFriendRequestDocId);
-            // We set 'hasUnreadFor' to the recipient's UID (Legacy) AND update timestamps
-            updateDoc(reqRef, {
-                hasUnreadFor: currentChatFriendUid,
-                lastMessageTime: serverTimestamp(),
-                lastMessageBy: user.uid
-            }).catch(err => console.error("Failed to set unread:", err));
+        // NOTIFICATION LOGIC: If DM, lookup doc from Map
+        if (currentChatType === 'dm') {
+            // robustness: use stored UID or parse
+            let otherUid = currentChatFriendUid;
+            if (!otherUid) {
+                const parts = currentChatId.split('_');
+                otherUid = parts.find(id => id !== user.uid);
+            }
+
+            if (otherUid) {
+                let reqDocId = friendDocMap.get(otherUid);
+
+                // Fallback: Query if not in Map
+                if (!reqDocId) {
+                    try {
+                        const q1 = query(collection(db, "friend_requests"), where("from", "==", user.uid), where("to", "==", otherUid));
+                        const s1 = await getDocs(q1);
+                        if (!s1.empty) reqDocId = s1.docs[0].id;
+                        else {
+                            const q2 = query(collection(db, "friend_requests"), where("from", "==", otherUid), where("to", "==", user.uid));
+                            const s2 = await getDocs(q2);
+                            if (!s2.empty) reqDocId = s2.docs[0].id;
+                        }
+                    } catch (e) {
+                        console.warn("Fallback query failed", e);
+                    }
+                }
+
+                if (reqDocId) {
+                    const reqRef = doc(db, "friend_requests", reqDocId);
+                    updateDoc(reqRef, {
+                        hasUnreadFor: otherUid,
+                        lastMessageTime: serverTimestamp(),
+                        lastMessageBy: user.uid
+                    }).catch(err => console.error("Failed to set unread:", err));
+                }
+            }
         }
 
         chatInput.value = '';
@@ -418,6 +556,13 @@ function loadFriendList() {
 
                     // On Click: Set Read Time locally
                     localStorage.setItem('read_dm_' + uid, new Date().toISOString());
+
+                    // Clear Unread in Firestore
+                    if (docId) {
+                        updateDoc(doc(db, "friend_requests", docId), {
+                            hasUnreadFor: null
+                        }).catch(e => console.warn("Failed to clear unread", e));
+                    }
 
                     currentFriendRequestDocId = docId;
                     currentChatFriendUid = uid;
@@ -598,6 +743,7 @@ function loadFriendList() {
         snapshot.docs.forEach(async docSnap => {
             const data = docSnap.data();
             const friendUid = data.from;
+            friendDocMap.set(friendUid, docSnap.id); // Update Map
 
             // Standardized Badge Logic (Matches Groups)
             const lastMsgTime = data.lastMessageTime ? data.lastMessageTime.toDate().getTime() : 0;
@@ -608,11 +754,17 @@ function loadFriendList() {
             const dmId = [myUid, friendUid].sort().join('_');
             const isActive = currentChatId === dmId;
 
-            const isUnread = false; // DISABLED
+            const isUnreadRaw = data.hasUnreadFor === myUid;
+            let isUnread = isUnreadRaw;
 
             // Live Auto-Read If Active
             if (isActive) {
                 setDMReadTime(friendUid);
+                if (isUnreadRaw) {
+                    // Auto-clear from Firestore if we are looking at it
+                    isUnread = false; // Don't show badge locally
+                    updateDoc(docSnap.ref, { hasUnreadFor: null }).catch(e => console.warn("Auto-clear failed", e));
+                }
             }
 
             // Always fetch latest name
@@ -631,6 +783,7 @@ function loadFriendList() {
         snapshot.docs.forEach(async docSnap => {
             const data = docSnap.data();
             const friendUid = data.to;
+            friendDocMap.set(friendUid, docSnap.id); // Update Map
 
             // Standardized Badge Logic (Matches Groups)
             const lastMsgTime = data.lastMessageTime ? data.lastMessageTime.toDate().getTime() : 0;
@@ -640,10 +793,15 @@ function loadFriendList() {
             const dmId = [myUid, friendUid].sort().join('_');
             const isActive = currentChatId === dmId;
 
-            const isUnread = false; // DISABLED
+            const isUnreadRaw = data.hasUnreadFor === myUid;
+            let isUnread = isUnreadRaw;
 
             if (isActive) {
                 setDMReadTime(friendUid);
+                if (isUnreadRaw) {
+                    isUnread = false;
+                    updateDoc(docSnap.ref, { hasUnreadFor: null }).catch(e => console.warn("Auto-clear failed", e));
+                }
             }
 
             // Always fetch latest name
@@ -1360,15 +1518,28 @@ function renderMessage(data, prepend = false) {
         });
     }
 
-    prepend ? messageContainer.prepend(msgDiv) : messageContainer.appendChild(msgDiv);
+    // Single append at the end is insufficient because we have async logic?
+    // Actually, we prepend/append immediately. Then update name later.
+    // The previous code appended TWICE. Remove the last one.
+    // The first one is line 1344 (system) or 1372 (normal).
+    // The second one was 1382.
+
 }
 
 scrollToBottomBtn.addEventListener('click', () => {
     messageContainer.scrollTo({ top: messageContainer.scrollHeight, behavior: 'smooth' });
 });
 
-// Infinite scroll logic (simplified for switch context)
+// Infinite scroll logic
 messageContainer.addEventListener('scroll', async () => {
     const isScrolledUp = messageContainer.scrollHeight - messageContainer.scrollTop > messageContainer.clientHeight + 500;
     scrollToBottomBtn.style.display = isScrolledUp ? "block" : "none";
+
+    // Debug Scroll
+    // console.log("Scroll Top:", messageContainer.scrollTop);
+
+    // Load Older Messages (Global Only)
+    if (currentChatType === 'global' && messageContainer.scrollTop < 50 && hasMoreMessages && !isLoadingOlder) {
+        await loadOlderMessages();
+    }
 });

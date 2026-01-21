@@ -106,7 +106,6 @@ fn default_ice_servers() -> Vec<RtcIceServer> {
         RtcIceServer {
             urls: vec![
                 // Google
-                "stun:l.google.com:19302".to_owned(),
                 "stun:stun.l.google.com:19302".to_owned(),
                 "stun:stun1.l.google.com:19302".to_owned(),
                 "stun:stun2.l.google.com:19302".to_owned(),
@@ -118,7 +117,7 @@ fn default_ice_servers() -> Vec<RtcIceServer> {
     ]
 }
 fn default_network_types() -> Vec<WebRtcNetworkType> {
-    vec![WebRtcNetworkType::Udp4, WebRtcNetworkType::Udp6]
+    vec![WebRtcNetworkType::Udp4]
 }
 
 fn default_pair_device_name() -> String {

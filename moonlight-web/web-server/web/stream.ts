@@ -8,13 +8,13 @@ import { defaultStreamInputConfig, MouseMode, ScreenKeyboardSetVisibleEvent, Str
 import { defaultStreamSettings, getLocalStreamSettings, StreamSettings } from "./component/settings_menu.js";
 import { SelectComponent } from "./component/input.js";
 
-
 import { getStandardVideoFormats, getSupportedVideoFormats } from "./stream/video.js";
 import { CanvasRenderer } from "./stream/canvas.js";
 import { StreamCapabilities, StreamKeys } from "./api_bindings.js";
 import { ScreenKeyboard, TextEvent } from "./screen_keyboard.js";
 import { FormModal } from "./component/modal/form.js";
 import { VirtualGamepad } from "./component/virtual_gamepad.js";
+import { ChatOverlay } from "./component/chat_overlay.js";
 
 async function startApp() {
     const api = await getApi()
@@ -71,6 +71,8 @@ class ViewerApp implements Component {
 
     private sidebar: ViewerSidebar
     private virtualGamepad: VirtualGamepad | null = null
+    private chatOverlay: ChatOverlay | null = null;
+    private isChatOpen: boolean = false;
 
     private div = document.createElement("div")
     private videoElement = document.createElement("video")
@@ -91,6 +93,15 @@ class ViewerApp implements Component {
 
     constructor(api: Api, hostId: number, appId: number) {
         this.api = api
+
+        // Configure Root Div
+        this.div.id = "viewer-root"
+        this.div.style.width = "100%"
+        this.div.style.height = "100%"
+        this.div.style.position = "absolute"
+        this.div.style.top = "0"
+        this.div.style.left = "0"
+        this.div.style.overflow = "hidden"
 
         // Configure sidebar
         this.sidebar = new ViewerSidebar(this)
@@ -178,10 +189,14 @@ class ViewerApp implements Component {
         // Add app info listener
         this.stream.addInfoListener(this.onInfo.bind(this))
 
-        // Init Virtual Gamepad
-        this.virtualGamepad = new VirtualGamepad(this.stream.getInput())
-        this.virtualGamepad.mount(this.div) // Mount to main div
-        this.virtualGamepad.enable()
+        // Init Virtual Gamepad (Mobile Only)
+        // Simple check for touch capability
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        if (isTouchDevice) {
+            this.virtualGamepad = new VirtualGamepad(this.stream.getInput())
+            this.virtualGamepad.mount(this.div) // Mount to main div
+            this.virtualGamepad.enable()
+        }
 
         // Create connection info modal
         const connectionInfo = new ConnectionInfoModal()
@@ -220,8 +235,11 @@ class ViewerApp implements Component {
     }
 
     private focusInput() {
-        const inputElement = document.getElementById("input") as HTMLDivElement
-        inputElement.focus()
+        // Look for the input element used by the stream to capture keystrokes
+        const inputElement = document.getElementById("input") as HTMLDivElement;
+        if (inputElement) {
+            inputElement.focus();
+        }
     }
 
     onUserInteraction() {
@@ -264,6 +282,7 @@ class ViewerApp implements Component {
 
     // Keyboard
     onKeyDown(event: KeyboardEvent) {
+        if (this.isChatOpen) return;
         this.onUserInteraction()
 
         event.preventDefault()
@@ -274,6 +293,7 @@ class ViewerApp implements Component {
 
     private isTogglingFullscreenWithKeybind: "waitForCtrl" | "makingFullscreen" | "none" = "none"
     onKeyUp(event: KeyboardEvent) {
+        if (this.isChatOpen) return;
         this.onUserInteraction()
 
         event.preventDefault()
@@ -302,6 +322,7 @@ class ViewerApp implements Component {
 
     // Mouse
     onMouseButtonDown(event: MouseEvent) {
+        if (this.isChatOpen) return;
         this.onUserInteraction()
 
         event.preventDefault()
@@ -310,6 +331,7 @@ class ViewerApp implements Component {
         event.stopPropagation()
     }
     onMouseButtonUp(event: MouseEvent) {
+        if (this.isChatOpen) return;
         this.onUserInteraction()
 
         event.preventDefault()
@@ -318,18 +340,21 @@ class ViewerApp implements Component {
         event.stopPropagation()
     }
     onMouseMove(event: MouseEvent) {
+        if (this.isChatOpen) return;
         event.preventDefault()
         this.stream?.getInput().onMouseMove(event, this.getStreamRect())
 
         event.stopPropagation()
     }
     onMouseWheel(event: WheelEvent) {
+        if (this.isChatOpen) return;
         event.preventDefault()
         this.stream?.getInput().onMouseWheel(event)
 
         event.stopPropagation()
     }
     onContextMenu(event: MouseEvent) {
+        if (this.isChatOpen) return;
         event.preventDefault()
 
         event.stopPropagation()
@@ -337,6 +362,7 @@ class ViewerApp implements Component {
 
     // Touch
     onTouchStart(event: TouchEvent) {
+        if (this.isChatOpen) return;
         this.onUserInteraction()
 
         event.preventDefault()
@@ -345,6 +371,7 @@ class ViewerApp implements Component {
         event.stopPropagation()
     }
     onTouchEnd(event: TouchEvent) {
+        if (this.isChatOpen) return;
         this.onUserInteraction()
 
         event.preventDefault()
@@ -353,6 +380,7 @@ class ViewerApp implements Component {
         event.stopPropagation()
     }
     onTouchCancel(event: TouchEvent) {
+        if (this.isChatOpen) return;
         this.onUserInteraction()
 
         event?.preventDefault()
@@ -361,11 +389,13 @@ class ViewerApp implements Component {
         event.stopPropagation()
     }
     onTouchUpdate() {
+        if (this.isChatOpen) return;
         this.stream?.getInput().onTouchUpdate(this.getStreamRect())
 
         window.requestAnimationFrame(this.onTouchUpdate.bind(this))
     }
     onTouchMove(event: TouchEvent) {
+        if (this.isChatOpen) return;
         event.preventDefault()
         this.stream?.getInput().onTouchMove(event, this.getStreamRect())
 
@@ -374,15 +404,19 @@ class ViewerApp implements Component {
 
     // Gamepad
     onGamepadConnect(event: GamepadEvent) {
+        if (this.isChatOpen) return;
         this.onGamepadAdd(event.gamepad)
     }
     onGamepadAdd(gamepad: Gamepad) {
+        if (this.isChatOpen) return;
         this.stream?.getInput().onGamepadConnect(gamepad)
     }
     onGamepadDisconnect(event: GamepadEvent) {
+        if (this.isChatOpen) return;
         this.stream?.getInput().onGamepadDisconnect(event)
     }
     onGamepadUpdate() {
+        if (this.isChatOpen) return;
         this.stream?.getInput().onGamepadUpdate()
 
         window.requestAnimationFrame(this.onGamepadUpdate.bind(this))
@@ -532,9 +566,29 @@ class ViewerApp implements Component {
 
 
     mount(parent: HTMLElement): void {
-        parent.appendChild(this.div)
+        parent.appendChild(this.div);
+
+        // --- Mount Chat Overlay ---
+        this.chatOverlay = new ChatOverlay((isOpen) => {
+            this.isChatOpen = isOpen;
+
+            if (!isOpen) {
+                // When chat closes, restore focus to the stream
+                // Use a slightly longer timeout to ensure the UI has updated
+                setTimeout(() => {
+                    this.focusInput();
+                    // Also try to focus video element directly as valid fallback
+                    if (this.videoElement) this.videoElement.focus();
+                }, 100);
+            }
+        });
+
+        this.chatOverlay.mount(this.div);
     }
     unmount(parent: HTMLElement): void {
+        if (this.chatOverlay) {
+            this.chatOverlay.unmount(this.div)
+        }
         parent.removeChild(this.div)
     }
 

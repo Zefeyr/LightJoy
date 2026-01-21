@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LightJoy Community Hub</title>
     <link rel="stylesheet" href="comm.css">
 </head>
@@ -12,6 +12,9 @@
     <div class="hub-wrapper">
         <nav class="hub-sidebar">
             <!-- SCROLLABLE SECTION -->
+            <div class="nav-back-header" onclick="window.location.href='homepage.html'">
+                <span style="font-size: 1.2rem; margin-right: 10px;">←</span> LightJoy Home
+            </div>
             <div class="sidebar-scroller">
                 <div class="sidebar-header">Channels</div>
                 <div class="channel-list">
@@ -41,14 +44,17 @@
                     style="margin-top:5px; background:transparent; border-color:#ce93d8; color:#ce93d8;">
                     Requests <span id="requests-badge" class="badge"></span>
                 </button>
-                <button class="btn-home-back" onclick="window.location.href='homepage.html'">← Home</button>
             </div>
         </nav>
 
         <main class="chat-main">
             <header class="chat-header">
-                <h2># global-chat</h2>
-                <p>Welcome to the LightJoy Hub!</p>
+                <button id="menu-btn" class="hamburger-btn">☰</button>
+                <div class="header-text" style="flex: 1;">
+                    <h2># global-chat</h2>
+                    <p>Welcome to the LightJoy Hub!</p>
+                </div>
+                <button id="users-btn" class="hamburger-btn" style="margin-right: 0;">👥</button>
             </header>
 
             <div id="chat-messages" class="chat-messages">

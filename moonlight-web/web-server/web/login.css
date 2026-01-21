@@ -4,14 +4,16 @@
 
 body {
     /* Set a dark background theme color similar to the LightJoy image */
-    background-color: rgb(15, 0, 30); 
+    background-color: rgb(15, 0, 30);
     font-size: 1.2rem;
     font-family: sans-serif;
-    color: white; /* Ensure text is visible */
+    color: white;
+    /* Ensure text is visible */
     margin: 0;
     padding: 0;
     height: 100vh;
-    display: flex; /* Use flexbox to center content on the page */
+    display: flex;
+    /* Use flexbox to center content on the page */
     justify-content: center;
     align-items: center;
 }
@@ -46,7 +48,7 @@ label {
     cursor: default;
     margin-right: 5px;
     /* Reset label color for specific login form overrides */
-    color: rgba(255, 255, 255, 0.9); 
+    color: rgba(255, 255, 255, 0.9);
 }
 
 /** Button (Base Style) */
@@ -173,13 +175,15 @@ input[type=number] {
     z-index: 2;
     width: 100%;
     height: 100%;
-    background-color: transparent; /* Rely on body background */
+    background-color: transparent;
+    /* Rely on body background */
 }
 
 /** Modal Content (The Base Box Style) */
 .modal-content {
     background-color: rgb(86, 92, 100);
-    margin: 0 auto; /* Override initial centering to be centered by flexbox */
+    margin: 0 auto;
+    /* Override initial centering to be centered by flexbox */
     padding: 20px;
     border: 1px solid #888;
     border-radius: 5px;
@@ -194,25 +198,28 @@ input[type=number] {
 /* Login Box Specific Styling (The Glass/Glow Effects) */
 .modal-content.login-form-box {
     max-width: 450px;
-    padding: 40px; 
-    margin: auto; /* Ensure it's centered within the modal-background flex container */
-    
+    padding: 40px;
+    margin: auto;
+    /* Ensure it's centered within the modal-background flex container */
+
     /* Darker, transparent purple background for the glass effect */
-    background-color: rgba(30, 0, 50, 0.4); 
-    
+    background-color: rgba(30, 0, 50, 0.4);
+
     /* Thin light purple border */
-    border: 1px solid rgba(206, 147, 216, 0.6); 
-    border-radius: 15px; 
+    border: 1px solid rgba(206, 147, 216, 0.6);
+    border-radius: 15px;
 
     /* FROSTED GLASS EFFECT */
-    backdrop-filter: blur(10px); 
-    -webkit-backdrop-filter: blur(10px); 
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 
     /* NEON GLOW SHADOWS */
-    box-shadow: 
-        0 4px 30px rgba(0, 0, 0, 0.2), 
-        0 0 15px rgba(206, 147, 216, 0.5), /* Inner purple glow */
-        0 0 40px rgba(206, 147, 216, 0.3); /* Outer purple glow */
+    box-shadow:
+        0 4px 30px rgba(0, 0, 0, 0.2),
+        0 0 15px rgba(206, 147, 216, 0.5),
+        /* Inner purple glow */
+        0 0 40px rgba(206, 147, 216, 0.3);
+    /* Outer purple glow */
 }
 
 /* Header Text */
@@ -226,11 +233,13 @@ input[type=number] {
 .login-form-box form {
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Space between input rows */
+    gap: 20px;
+    /* Space between input rows */
 }
 
 .login-form-box .input-div {
-    flex-direction: column; /* Stack label and input vertically */
+    flex-direction: column;
+    /* Stack label and input vertically */
     align-items: flex-start;
 }
 
@@ -245,11 +254,14 @@ input[type=number] {
     width: 100%;
     box-sizing: border-box;
     padding: 15px;
-    background-color: transparent; /* Makes the input glassy/transparent */
-    border: 1px solid rgba(206, 147, 216, 0.4); /* Light purple border */
+    background-color: transparent;
+    /* Makes the input glassy/transparent */
+    border: 1px solid rgba(206, 147, 216, 0.4);
+    /* Light purple border */
     border-radius: 8px;
     font-size: 1.1rem;
-    transition: all 0.2s; /* Apply transition for smooth focus/hover */
+    transition: all 0.2s;
+    /* Apply transition for smooth focus/hover */
 }
 
 /* Remove default base hover for these inputs */
@@ -271,17 +283,18 @@ input[type=number] {
 .login-form-box .submit-button {
     /* Overrides the original solid blue background */
     background: linear-gradient(135deg, rgba(160, 100, 255, 1), rgba(63, 81, 181, 1));
-    padding: 10px 30px; 
-    border-radius: 20px; 
+    padding: 10px 30px;
+    border-radius: 20px;
     font-weight: bold;
-    box-shadow: 0 0 10px rgba(160, 100, 255, 0.4); 
+    box-shadow: 0 0 10px rgba(160, 100, 255, 0.4);
     font-size: 1.4rem;
-    margin: 0; /* Remove base button margin */
+    margin: 0;
+    /* Remove base button margin */
 }
 
 /* Gradient Button Hover Glow */
 .login-form-box .submit-button:hover {
-    box-shadow: 0 0 20px rgba(160, 100, 255, 0.8), 0 0 5px rgba(255, 255, 255, 0.4); 
+    box-shadow: 0 0 20px rgba(160, 100, 255, 0.8), 0 0 5px rgba(255, 255, 255, 0.4);
     transition: box-shadow 0.3s;
 }
 
@@ -305,7 +318,7 @@ input[type=number] {
 }
 
 .login-form-box .link-text a {
-    color: rgb(206, 147, 216); 
+    color: rgb(206, 147, 216);
     text-decoration: none;
     font-weight: bold;
 }
@@ -319,10 +332,12 @@ input[type=number] {
     position: absolute;
     top: 20px;
     left: 20px;
-    z-index: 20; /* Ensure it stays above the modal-background */
+    z-index: 20;
+    /* Ensure it stays above the modal-background */
     font-size: 18px;
     text-decoration: none;
-    color: white; /* Default white color */
+    color: white;
+    /* Default white color */
     display: flex;
     align-items: center;
     gap: 8px;
@@ -333,31 +348,38 @@ input[type=number] {
 
 .nav-link:hover {
     /* Subtle hover effect consistent with the dark theme */
-    background-color: rgba(255, 255, 255, 0.1); 
-    color: rgb(206, 147, 216); /* Change to theme accent color on hover */
+    background-color: rgba(255, 255, 255, 0.1);
+    color: rgb(206, 147, 216);
+    /* Change to theme accent color on hover */
 }
 
 /* Style for the arrow icon */
 .nav-arrow {
     font-size: 18px;
-    line-height: 1; /* Ensure the arrow icon aligns correctly */
+    line-height: 1;
+    /* Ensure the arrow icon aligns correctly */
 }
 
 .google-signin-btn {
     /* 1. FLEXBOX ALIGNMENT */
     display: flex;
-    align-items: center;      /* Vertically centers logo and text */
-    justify-content: center;   /* Horizontally centers the group */
-    gap: 12px;                /* Perfect spacing between logo and text */
-    
+    align-items: center;
+    /* Vertically centers logo and text */
+    justify-content: center;
+    /* Horizontally centers the group */
+    gap: 12px;
+    /* Perfect spacing between logo and text */
+
     /* 2. SIZING & SHAPE */
     width: 100%;
-    max-width: 300px;         /* Adjust based on your form width */
+    max-width: 300px;
+    /* Adjust based on your form width */
     padding: 12px 24px;
     border-radius: 8px;
-    
+
     /* 3. LIGHTJOY AESTHETIC */
-    background: #4285F4;      /* Google Blue */
+    background: #4285F4;
+    /* Google Blue */
     color: white;
     border: none;
     font-family: 'Inter', sans-serif;
@@ -365,7 +387,7 @@ input[type=number] {
     font-size: 16px;
     cursor: pointer;
     transition: all 0.3s ease;
-    
+
     /* 4. NEON GLOW EFFECT */
     box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
 }
@@ -377,9 +399,183 @@ input[type=number] {
 }
 
 .google-signin-btn svg {
-    flex-shrink: 0;           /* Prevents the logo from squishing */
+    flex-shrink: 0;
+    /* Prevents the logo from squishing */
 }
 
 .google-signin-btn span {
-    white-space: nowrap;      /* Keeps the text on one line */
+    white-space: nowrap;
+    /* Keeps the text on one line */
+}
+
+/* --- Loading Overlay (Matches Homepage but with Login Theme) --- */
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgb(15, 0, 30);
+    /* Matches body background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255, 255, 255, 0.1);
+    border-top-color: rgb(206, 147, 216);
+    /* Purple accent */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* --- Interactive Button Feedback --- */
+/* Scale down on click for tactile feel */
+button:active,
+.file-button:active,
+.submit-button:active,
+.google-signin-btn:active,
+.nav-link:active {
+    transform: scale(0.96) translateY(0);
+    transition: transform 0.1s;
+}
+
+/* --- Loading Button State --- */
+.loading-btn {
+    position: relative;
+    color: transparent !important;
+    /* Hide text */
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.loading-btn::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: button-spin 0.8s linear infinite;
+    transform: translate(-50%, -50%);
+    /* Center it accurately */
+}
+
+@keyframes button-spin {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 480px) {
+    .login-form-box {
+        width: 90%;
+        max-width: none;
+        padding: 25px 20px;
+        margin: 20px auto;
+    }
+
+    .login-form-box h2 {
+        font-size: 2rem;
+        margin-bottom: 20px;
+    }
+
+    .login-form-box input[type="text"],
+    .login-form-box input[type="password"] {
+        font-size: 1rem;
+        padding: 12px;
+    }
+
+    .submit-button {
+        width: 100%;
+        padding: 12px;
+        font-size: 1.2rem;
+    }
+
+    .google-signin-btn {
+        width: 100%;
+        max-width: none;
+        font-size: 14px;
+        padding: 10px;
+        justify-content: center;
+    }
+
+    .nav-link {
+        top: 10px;
+        left: 10px;
+        font-size: 16px;
+        padding: 8px;
+    }
+}
+
+/* --- Toast Notifications (Replaces Alerts) --- */
+#toast-container {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 10000;
+}
+
+.toast {
+    min-width: 300px;
+    background: rgba(30, 30, 40, 0.95);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    border-left: 5px solid #007bff;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1rem;
+    backdrop-filter: blur(5px);
+
+    opacity: 0;
+    transform: translateY(20px);
+    animation: toast-in 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.toast.error {
+    border-left-color: #ff5252;
+}
+
+.toast.success {
+    border-left-color: #4CAF50;
+}
+
+.toast.fade-out {
+    animation: toast-out 0.3s forwards;
+}
+
+@keyframes toast-in {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes toast-out {
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
 }

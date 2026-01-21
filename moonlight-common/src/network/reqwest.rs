@@ -33,7 +33,7 @@ fn default_builder() -> ClientBuilder {
         .pool_max_idle_per_host(0)
 }
 fn timeout_builder() -> ClientBuilder {
-    default_builder().timeout(Duration::from_secs(2))
+    default_builder().timeout(Duration::from_secs(5)) // Increased from 2s to 5s
 }
 
 fn build_url(

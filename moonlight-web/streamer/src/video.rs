@@ -37,13 +37,14 @@ use crate::{
     StreamConnection,
     sender::{SequencedTrackLocalStaticRTP, TrackLocalSender},
     video::{
-        annexb::AnnexBSplitter,
+        av1::reader::Av1Reader,
         h264::{payloader::H264Payloader, reader::H264Reader},
         h265::{payloader::H265Payloader, reader::H265Reader},
     },
 };
 
 mod annexb;
+mod av1;
 mod h264;
 mod h265;
 
@@ -80,7 +81,7 @@ enum VideoCodec {
         payloader: H265Payloader,
     },
     Av1 {
-        annex_b: AnnexBSplitter<Cursor<Vec<u8>>>,
+        reader: Av1Reader<Cursor<Vec<u8>>>,
         payloader: Av1Payloader,
     },
 }
@@ -225,7 +226,7 @@ impl VideoDecoder for TrackSampleVideoDecoder {
             | VideoFormat::Av1High8_444
             | VideoFormat::Av1High10_444 => {
                 self.video_codec = Some(VideoCodec::Av1 {
-                    annex_b: AnnexBSplitter::new(Cursor::new(Vec::new()), 0),
+                    reader: Av1Reader::new(Cursor::new(Vec::new()), 0),
                     payloader: Default::default(),
                 });
             }
@@ -282,14 +283,21 @@ impl VideoDecoder for TrackSampleVideoDecoder {
                 Self::send_single_frame(&mut self.samples, &mut self.sender, payloader, timestamp);
             }
             // -- AV1
-            Some(VideoCodec::Av1 { annex_b, payloader }) => {
-                annex_b.reset(Cursor::new(full_frame));
+            Some(VideoCodec::Av1 { reader, payloader }) => {
+                reader.reset(Cursor::new(full_frame));
 
-                while let Ok(Some(annex_b_payload)) = annex_b.next() {
-                    let data =
-                        trim_bytes_to_range(annex_b_payload.full, annex_b_payload.payload_range);
-
-                    self.samples.push(data);
+                loop {
+                    match reader.next_obu() {
+                        Ok(Some(obu)) => {
+                            let data = trim_bytes_to_range(obu.full, obu.payload_range);
+                            self.samples.push(data);
+                        },
+                        Ok(None) => break,
+                        Err(e) => {
+                            warn!("AV1 Reader Error: {:?}", e);
+                            break;
+                        }
+                    }
                 }
 
                 Self::send_single_frame(&mut self.samples, &mut self.sender, payloader, timestamp);

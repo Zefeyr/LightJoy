@@ -2,6 +2,17 @@ body {
     background-color: rgb(48, 48, 48);
     font-size: 1.2rem;
     font-family: sans-serif;
+    height: 100%;
+    /* Ensure body takes full window height */
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+    /* Prevent scrolling on body */
+}
+
+html {
+    height: 100%;
+    width: 100%;
 }
 
 /* Prevent pull down refresh when Streaming */
@@ -51,6 +62,46 @@ button {
 button:hover {
     transition: box-shadow 0.2s;
     box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+/* --- Responsive Card/Host Grids --- */
+/* Ensure the container (usually divElement) wraps content */
+.actions-list+div,
+/* This targets the container after actions-list */
+#root>div>div:nth-child(3) {
+    /* Fallback for the main content area */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 10px;
+}
+
+/* Ensure cards don't overflow on tiny screens */
+.game-card,
+.host-card {
+    max-width: 100%;
+    /* prevent overflow */
+    flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+    .actions-list {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-settings {
+        width: 100%;
+        padding: 12px 20px;
+    }
+
+    .lightjoy-app-container {
+        padding: 15px;
+        margin: 10px;
+    }
 }
 
 /** Checkbox */
@@ -429,7 +480,6 @@ input[type=number] {
     background-position: center;
     background-repeat: no-repeat;
     background-size: 30px;
-    /* Smaller, cleaner */
     width: 50px;
     height: 50px;
 }
@@ -447,12 +497,58 @@ input[type=number] {
 .btn-home {
     color: white;
     text-decoration: none;
-    font-weight: 600;
     padding: 0 20px;
     height: 50px;
     font-size: 1rem;
-    margin-right: auto;
-    /* Pushes other buttons to the right */
+    margin-right: 0;
+}
+
+/* Instructional Title - Bold Typography */
+.action-bar-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+
+    /* Enhanced Typography for Clarity */
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+
+    /* Gradient Text for Visual Appeal */
+    background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    /* Subtle Depth - No Button Appearance */
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+/* Hide title on mobile to prevent overlap */
+@media (max-width: 600px) {
+    .action-bar-title {
+        display: none;
+    }
+}
+
+/* Ensure container supports absolute center */
+.actions-list {
+    position: relative;
+    justify-content: space-between;
+    /* Push items to edges */
+}
+
+.right-actions {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+    /* Push to right */
+    z-index: 2;
+    /* Ensure clickable above centered title */
 }
 
 .settings {
@@ -464,32 +560,83 @@ input[type=number] {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
 }
 
+/* Host Wrapper */
 .host-element {
-    cursor: pointer;
-    margin: 0.2cm;
-    padding-top: 0.1cm;
-    padding-bottom: 0.5cm;
-    padding-left: 0.4cm;
-    padding-right: 0.4cm;
+    margin: 10px;
+    padding: 0;
+    transition: all 0.2s ease;
 }
 
-.host-element:hover {
-    transition: all 0.2s;
-    background-color: rgba(255, 255, 255, 0.2);
+/* Host Card - Clean & Simple Design */
+.host-card {
+    background: #fff;
+    /* Light theme card, or dark depending on global vars but keeping it neutral */
+    background: var(--card-bg, rgba(255, 255, 255, 0.05));
+    /* Fallback to variable if exists, or subtle overlay */
+    border-radius: 12px;
+    overflow: hidden;
+    width: 260px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.host-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .host-image {
-    width: 6cm;
-    height: auto;
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.host-info {
+    padding: 15px;
+    text-align: center;
 }
 
 .host-name {
-    margin: 0;
-    color: white;
-    font-size: 3rem;
-    text-align: center;
+    margin: 0 0 5px 0;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.host-status {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* Overlay Icon (Lock/Offline) - Simplified */
+.host-image-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 5px;
+    border-radius: 50%;
+    pointer-events: none;
 }
 
 /** Apps */
@@ -645,4 +792,72 @@ canvas.video-stream {
     height: 32px;
     pointer-events: none;
     /* Let clicks pass through */
+}
+
+/* --- Touch Targets --- */
+button,
+a,
+input,
+select,
+.host-card,
+.game-card {
+    min-height: 44px;
+    /* Apple Human Interface Guideline */
+    min-width: 44px;
+}
+
+#toast-container {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 10000;
+}
+
+.toast {
+    min-width: 300px;
+    background: rgba(48, 48, 48, 0.95);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    border-left: 5px solid #007bff;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1rem;
+    backdrop-filter: blur(5px);
+
+    opacity: 0;
+    transform: translateY(20px);
+    animation: toast-in 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.toast.error {
+    border-left-color: #ff5252;
+}
+
+.toast.success {
+    border-left-color: #4CAF50;
+}
+
+.toast.fade-out {
+    animation: toast-out 0.3s forwards;
+}
+
+@keyframes toast-in {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes toast-out {
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
 }

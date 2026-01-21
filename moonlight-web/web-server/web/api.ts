@@ -27,7 +27,9 @@ export async function getApi(host_url?: string): Promise<Api> {
             const testCredentials = await showModal(prompt)
 
             if (testCredentials == null) {
-                continue;
+                window.location.href = "homepage.html";
+                // Return a dummy promise that will never be used since we are navigating away
+                return new Promise(() => { });
             }
 
             let api = { host_url, credentials: testCredentials }
@@ -55,7 +57,6 @@ class ApiCredentialsPrompt extends FormModal<string> {
 
     private text: HTMLElement = document.createElement("h3")
     private credentials: InputComponent
-    private credentialsFile: InputComponent
 
     constructor() {
         super()
@@ -63,8 +64,6 @@ class ApiCredentialsPrompt extends FormModal<string> {
         this.text.innerText = "Enter Credentials"
 
         this.credentials = new InputComponent("ml-api-credentials", "password", "Credentials")
-
-        this.credentialsFile = new InputComponent("ml-api-credentials-file", "file", "Credentials as File", { accept: ".txt" })
     }
 
     reset(): void {
@@ -75,43 +74,13 @@ class ApiCredentialsPrompt extends FormModal<string> {
     }
 
     onFinish(abort: AbortSignal): Promise<string | null> {
-        const abortController = new AbortController()
-        abort.addEventListener("abort", abortController.abort.bind(abortController))
-
-        return new Promise((resolve, reject) => {
-            this.credentialsFile.addChangeListener(() => {
-                const files = this.credentialsFile.getFiles()
-                if (files && files.length >= 1) {
-                    const file = files[0]
-
-                    file.text().then((credentials) => {
-                        abortController.abort()
-
-                        // Remove carriage return and new line
-                        resolve(
-                            credentials
-                                .replace(/\r/g, "")
-                                .replace(/\n/g, "")
-                        )
-                    })
-                }
-            }, { signal: abortController.signal })
-
-            super.onFinish(abortController.signal).then((data) => {
-                abortController.abort()
-                resolve(data)
-            }, (data) => {
-                abortController.abort()
-                reject(data)
-            })
-        })
+        return super.onFinish(abort)
     }
 
     mountForm(form: HTMLFormElement): void {
         form.appendChild(this.text)
 
         this.credentials.mount(form)
-        this.credentialsFile.mount(form)
     }
 }
 

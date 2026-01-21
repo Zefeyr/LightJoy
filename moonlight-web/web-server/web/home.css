@@ -30,78 +30,265 @@ body {
     line-height: 1.6;
 }
 
-/* Navigation Bar */
+/* Base Navbar */
 .navbar {
     position: fixed;
     top: 0;
     width: 100%;
+    /* Standard height/padding, no fixed small apple height */
+    padding: 0;
+    /* Reset padding to 0, let container handle it */
     background: rgba(10, 14, 39, 0.95);
-    backdrop-filter: blur(10px);
+    /* High opacity dark background */
     border-bottom: 1px solid var(--border-color);
-    z-index: 1000;
-    padding: 1rem 0;
+    z-index: 9999;
+    transition: background 0.3s ease;
+    display: block;
+    /* Override Bootstrap's display: flex */
 }
 
 .navbar-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 2rem;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    /* Move vertical padding here */
 }
 
+/* Logo */
 .logo {
+    text-decoration: none;
+    z-index: 10001;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--primary-color);
 }
 
 .logo-text {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 700;
     background: var(--gradient-1);
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
     background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* 2. Desktop Navigation (Visible) */
+.nav-overlay {
+    position: static;
+    /* Reset from the mobile 'fixed' position */
+    width: auto;
+    height: auto;
+    background: transparent;
+    display: block;
+    pointer-events: auto;
+    visibility: visible;
 }
 
 .nav-links {
-    display: flex;
     list-style: none;
+    display: flex;
+    /* Horizontal layout for desktop */
     gap: 2rem;
     align-items: center;
+    opacity: 1;
+    /* Always visible on desktop */
+    transform: none;
+    margin: 0;
+    padding: 0;
 }
 
 .nav-link {
     color: var(--text-secondary);
     text-decoration: none;
-    transition: color 0.3s ease;
+    font-size: 1rem;
     font-weight: 500;
+    transition: color 0.3s ease;
+    padding: 0.5rem 0;
 }
 
 .nav-link:hover {
     color: var(--primary-color);
 }
 
-.join-btn-nav {
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 0.5rem 1.5rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    display: inline-block;
+.join-btn-mobile {
+    display: none;
+    /* Hide mobile-specific join button on desktop */
 }
 
-.join-btn-nav:hover {
-    background: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 123, 255, 0.3);
+/* User Dropdown Menu - Cleaned & Modernized */
+.dropdown-menu {
+    min-width: 220px;
+    padding: 0;
+    /* More vertical breathing room */
+    background-color: #1a1a2e !important;
+    border: 1px solid rgba(206, 147, 216, 0.6) !important;
+    /* Softer border */
+    border-radius: 12px !important;
+    /* Smoother corners */
+    margin-top: 10px !important;
+    /* Spacing from the trigger button */
+}
+
+.dropdown-item-text {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+    color: #ce93d8 !important;
+    /* Use accent color for the email label */
+    opacity: 0.9;
+    text-align: center;
+    /* Center the email for consistency */
+}
+
+.dropdown-item {
+    padding: 0.8rem 1.2rem;
+    /* Balanced spacing */
+    font-size: 0.95rem;
+    color: #ffffff !important;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: center;
+    /* Forces content to center */
+    align-items: center;
+}
+
+/* Hover State */
+.dropdown-item:hover {
+    background-color: rgba(206, 147, 216, 0.1) !important;
+    color: #ce93d8 !important;
+}
+
+/* Red Sign Out Allignment */
+.dropdown-item.text-danger {
+    color: #ff5252 !important;
+    justify-content: center;
+}
+
+.dropdown-item.text-danger:hover {
+    background-color: rgba(255, 82, 82, 0.1) !important;
+}
+
+.dropdown-divider {
+    margin: 0;
+    border-top: 1px solid rgba(206, 147, 216, 0.3);
+    /* Transparent divider */
+}
+
+/* 3. The Hamburger Button (Hidden on Desktop) */
+.menu-toggle {
+    display: none;
+    /* Hide button on desktop */
+    appearance: none;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent;
+    width: 45px;
+    /* Increased hitbox size */
+    height: 45px;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+}
+
+/* ==========================================================================
+   MOBILE STYLES (Max-width: 768px)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+
+    /* Show the Hamburger Button */
+    .menu-toggle {
+        display: flex;
+    }
+
+    /* SVG Line Styling */
+    .menu-toggle svg {
+        width: 32px;
+        /* Icon width */
+        height: 22px;
+        /* Icon height */
+        pointer-events: none;
+    }
+
+    .menu-toggle line {
+        stroke: white;
+        /* Matches your dark theme */
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        transition: transform 0.3s ease;
+        transform-origin: center;
+    }
+
+    /* "X" Animation when .active class is applied */
+    .menu-toggle.active .line-top {
+        transform: translateY(4px) rotate(45deg);
+    }
+
+    .menu-toggle.active .line-bottom {
+        transform: translateY(-4px) rotate(-45deg);
+    }
+
+    /* Convert Navigation to Mobile Full-Screen Overlay */
+    .nav-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 0;
+        /* Hidden until opened */
+        background: rgba(10, 14, 39, 0.98);
+        overflow: hidden;
+        transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 80px;
+        z-index: 10000;
+        pointer-events: none;
+        visibility: hidden;
+    }
+
+    /* Open the menu when parent .navbar has .active */
+    .navbar.active .nav-overlay {
+        height: 100vh;
+        pointer-events: auto;
+        visibility: visible;
+    }
+
+    /* Mobile Link Styling (Stacked) */
+    .nav-links {
+        flex-direction: column;
+        gap: 2rem;
+        text-align: center;
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: opacity 0.3s ease, transform 0.4s ease;
+    }
+
+    .navbar.active .nav-links {
+        opacity: 1;
+        transform: translateY(0);
+        transition-delay: 0.2s;
+    }
+
+    .nav-link {
+        font-size: 1.5rem;
+    }
+
+    .join-btn-mobile {
+        display: inline-block;
+        margin-top: 1rem;
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        text-decoration: none;
+    }
 }
 
 /* Hero Section */
@@ -129,8 +316,8 @@ body {
     margin-bottom: 1rem;
     background: var(--gradient-1);
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
     background-clip: text;
+    -webkit-text-fill-color: transparent;
     line-height: 1.2;
 }
 
@@ -213,8 +400,8 @@ body {
     margin-bottom: 3rem;
     background: var(--gradient-1);
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
     background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .features-grid {
@@ -347,8 +534,8 @@ body {
     margin-bottom: 1rem;
     background: var(--gradient-2);
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
     background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .cta-content p {
@@ -417,13 +604,13 @@ body {
 }
 
 /* Scroll Animations */
-.scroll-hidden {
+.reveal {
     opacity: 0;
     transform: translateY(30px);
-    transition: all 0.6s ease-out;
+    transition: opacity 0.8s cubic-bezier(0.5, 0, 0, 1), transform 0.8s cubic-bezier(0.5, 0, 0, 1);
 }
 
-.scroll-show {
+.reveal.active {
     opacity: 1;
     transform: translateY(0);
 }
@@ -442,10 +629,10 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .navbar-container {
+    /* .navbar-container {
         flex-direction: column;
         gap: 1rem;
-    }
+    } REMOVED to keep logo and hamburger side-by-side */
 
     /* Rest of the responsive block unchanged... */
 
@@ -488,8 +675,12 @@ body {
 }
 
 @media (max-width: 480px) {
+    .container {
+        padding: 0 15px;
+    }
+
     .hero-title {
-        font-size: 1.8rem;
+        font-size: 2.2rem;
     }
 
     .cta-button {
@@ -518,6 +709,15 @@ body {
     .logo-text {
         font-size: 1.2rem;
     }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .feature-card {
+        padding: 1.5rem;
+    }
 }
 
 /* Container for the whole app */
@@ -539,6 +739,7 @@ body {
     font-weight: 800;
     background: linear-gradient(90deg, #ce93d8, #4285F4);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 25px;
     text-align: center;

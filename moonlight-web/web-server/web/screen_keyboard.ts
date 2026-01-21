@@ -40,6 +40,13 @@ export class ScreenKeyboard {
         if (this.visible) {
             this.visible = false
 
+            // Check if another input already has focus (e.g. Chat Overlay)
+            const active = document.activeElement as HTMLElement;
+            if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA") && active !== this.fakeElement) {
+                // Do not steal focus back, just let it go
+                return;
+            }
+
             this.fakeElement.focus()
             this.fakeElement.blur()
         }

@@ -9,6 +9,8 @@ export class HostList extends FetchListComponent<DetailedHost | UndetailedHost, 
 
     private eventTarget = new EventTarget()
 
+    private emptyState: HTMLElement
+
     constructor(api: Api) {
         super({
             listClasses: ["host-list"],
@@ -16,12 +18,48 @@ export class HostList extends FetchListComponent<DetailedHost | UndetailedHost, 
         })
 
         this.api = api
+
+        // Empty State: Simple & Clean
+        this.emptyState = document.createElement("div")
+        this.emptyState.innerHTML = `
+            <div style="font-size: 3rem; opacity: 0.2; margin-bottom: 10px;">🖥️</div>
+            <h3 style="color: rgba(255,255,255,0.8); font-size: 1rem; margin: 0;">No Hosts Found</h3>
+            <p style="color: rgba(255,255,255,0.4); font-size: 0.8rem;">Add a computer to start streaming</p>
+        `
+        this.emptyState.style.cssText = `
+            width: 100%;
+            text-align: center;
+            padding: 40px;
+            display: none;
+            opacity: 0.7;
+        `
     }
 
     async forceFetch() {
         const hosts = await apiGetHosts(this.api)
-
         this.updateCache(hosts)
+    }
+
+    updateCache(cache: (DetailedHost | UndetailedHost)[]) {
+        super.updateCache(cache)
+        this.updateUIState(cache.length)
+    }
+
+    private updateUIState(count: number) {
+        // Ensure EmptyState is present and at the end
+        const listEl = this.list.getListElement()
+
+        if (!listEl.contains(this.emptyState)) {
+            listEl.appendChild(this.emptyState)
+        } else {
+            listEl.appendChild(this.emptyState)
+        }
+
+        if (count > 0) {
+            this.emptyState.style.display = "none"
+        } else {
+            this.emptyState.style.display = "block"
+        }
     }
 
     protected updateComponentData(component: Host, data: DetailedHost | UndetailedHost): void {
@@ -41,6 +79,8 @@ export class HostList extends FetchListComponent<DetailedHost | UndetailedHost, 
 
         newHost.addHostRemoveListener(this.removeHostListener.bind(this))
         newHost.addHostOpenListener(this.onHostOpenEvent.bind(this))
+
+        this.updateUIState(this.list.get().length)
     }
     public removeList(listIndex: number): void {
         const hostComponent = this.list.remove(listIndex)
@@ -53,6 +93,7 @@ export class HostList extends FetchListComponent<DetailedHost | UndetailedHost, 
         const listIndex = this.list.get().findIndex(component => component.getHostId() == event.component.getHostId())
 
         this.removeList(listIndex)
+        this.updateUIState(this.list.get().length)
     }
 
     getHost(hostId: number): Host | undefined {

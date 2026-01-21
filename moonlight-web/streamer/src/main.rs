@@ -7,7 +7,7 @@ use common::{
     ipc::{IpcReceiver, IpcSender, ServerIpcMessage, StreamerIpcMessage, create_process_ipc},
     serialize_json,
 };
-use log::{LevelFilter, debug, info, warn};
+use log::{LevelFilter, debug, info, warn, error};
 use moonlight_common::{
     MoonlightError,
     high::HostError,
@@ -88,8 +88,23 @@ async fn main() {
 
     let default_panic = panic::take_hook();
     panic::set_hook(Box::new(move |info| {
+        // Log to console first
         default_panic(info);
-        exit(0);
+        
+        let msg = format!("Streamer Panic: {:?}", info);
+        error!("{}", msg);
+        
+        // Write to file as fallback
+        if let Ok(mut file) = std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open("streamer_panic.log") 
+        {
+            use std::io::Write;
+            let _ = writeln!(file, "{} - {}", chrono::Local::now(), msg);
+        }
+
+        exit(1);
     }));
 
     // At this point we're authenticated
