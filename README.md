@@ -3,7 +3,7 @@
 
 It hosts a Web Server which forwards [Sunshine](https://docs.lizardbyte.dev/projects/sunshine/latest/) traffic to a Browser using the [WebRTC Api](https://webrtc.org/).
 
-![Lightjoy Screenshot](/readme/structure.png)
+![Lightjoy Screenshot](/readme/homepage.png)
 
 ## Key Features
 - **Customizable Touch Controls**: Drag and drop virtual gamepad buttons to suit your hand size and preference. Tap the **✏️ Pencil** icon to edit; your layout is saved automatically.
@@ -27,17 +27,27 @@ It hosts a Web Server which forwards [Sunshine](https://docs.lizardbyte.dev/proj
 
 ## Images
 
+### Login Page
+![View: loginpage](/readme/loginpage.jpg)
+
 ### Host List
-![View: Hosts](/readme/hostView.jpg)
+![View: noHosts](/readme/nohost.jpg)
+![View: Hosts](/readme/host.jpg)
+
+### Community Hub
+![View: community hub](/readme/commhub.jpg)
 
 ### Games List
-![View: Games View](/readme/gamesView.jpg)
+![View: Games View](/readme/gamesel.jpg)
 
 ### Streaming
-![View: Edit Mode with Draggable Buttons](/readme/stream_edit_mode.jpg)
+![View: Edit Mode with Draggable Buttons](/readme/mobilestream.jpg)
 
 ### Customizable Controls (Edit Mode)
-![View: Streaming, sidebar closed](/readme/stream.jpg)
+![View: Streaming, sidebar closed](/readme/streameditmode.jpg)
+
+### Floating Chat
+![View: floating chat](/readme/streamwchat.jpg)
 
 ## Limitations
 - Features that only work in a [Secure Context](https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts#:~:text=They%20must%20be,be%20considered%20deprecated.) -> [How to configure a Secure Context / https](#configuring-https)
